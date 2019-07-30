@@ -36,17 +36,20 @@ export default {
   data() {
     return {
       username: '',
-      password: ''
+      password: '',
+      instance: null
     }
   },
 
   mounted: function() {
 
+    this.instance = axios.create({baseURL: 'https://ics.hutton.ac.uk/germinate-demo/cactuar-dev/brapi/v1'});
+
     // Change to the below baseurl when the gobii instance is ready
     // http://hackathon.gobii.org:8081/gobii-dev/brapi/v1
 
-    axios
-      .get("http://ics.hutton.ac.uk/germinate-demo/cactuar-dev/brapi/v1/calls", {}, {})
+    this.instance
+      .get("/calls", {}, {})
       .then(
         function(response) {
           this.$store.dispatch('ON_CALLS_CHANGED', response.data.result.data)
@@ -60,11 +63,11 @@ export default {
 
   methods: {
     loginClicked: function() {
-      var url = 'http://ics.hutton.ac.uk/germinate-demo/cactuar-dev/brapi/v1/token';
+      var url = 'http://minke.hutton.ac.uk:9002/germinate-demo/cactuar-dev/brapi/v1/token';
       var data = { username: this.username, password: this.password, grant_type: "password", client_id: "flapjack-bytes"};
 
-      axios
-        .post(url, data, {headers: {"Content-Type": "application/json"}})
+      this.instance
+        .post("/token", data, {headers: {"Content-Type": "application/json"}})
         .then(function(response) {
           console.log(response.data.access_token)
 
