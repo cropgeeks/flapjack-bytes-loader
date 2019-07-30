@@ -15,15 +15,15 @@ const router = new Router({
       meta: {
         title: 'Flapjack Bytes Loader',
       }
-    }/*,
+    },
     {
-      path: '/blues',
-      name: 'blues',
-      component: () => import('./views/Blues.vue'),
+      path: '/options',
+      name: 'options',
+      component: () => import('./views/Options.vue'),
       meta: {
-        title: 'BLUEs Analysis',
+        title: 'Flapjack Bytes Options',
       }
-    }*/
+    }
   ]
 })
 
