@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@solgenomics/brapijs": "^1.0.1",
     "axios": "^0.19.0",
     "bootstrap-vue": "^2.0.0-rc.27",
     "core-js": "^2.6.5",

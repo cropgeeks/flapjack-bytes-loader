@@ -29,6 +29,7 @@
 
 <script>
 import axios from 'axios'
+import brapi from '@solgenomics/brapijs'
 
 export default {
   name: 'home',
@@ -41,53 +42,42 @@ export default {
 
   mounted: function() {
 
-    // axios
-    //   .get("http://hackathon.gobii.org:8081/gobii-dev/brapi/v1/calls", {}, {})
-    //   .then(
-    //     function(response) {
-    //       console.log(response)
-    //       this.$store.dispatch('ON_CALLS_CHANGED', response.data.result.data)
-    //     }.bind(this)
-    //   )
-    //   .catch(error => {
-    //     console.log(error)
-    //     this.errorMsg = "No /calls found";
-    //   });
+    // Change to the below baseurl when the gobii instance is ready
+    // http://hackathon.gobii.org:8081/gobii-dev/brapi/v1
 
-    var url = 'http://hackathon.gobii.org:8081/gobii-dev/brapi/v1/calls';
-
-      // Using fetch to get an access token so we can use brapi.js to talk to the brapi resource from here on out
-      fetch(url, {
-        method: 'GET',
-        mode: "no-cors",
-        headers:{
-          'Content-Type': 'application/json'
-        }
-      }).then(
+    axios
+      .get("http://ics.hutton.ac.uk/germinate-demo/cactuar-dev/brapi/v1/calls", {}, {})
+      .then(
         function(response) {
-          console.log('Success:', response)
-      }.bind(this))
-      .catch(error => console.error('Error:', error))
+          this.$store.dispatch('ON_CALLS_CHANGED', response.data.result.data)
+        }.bind(this)
+      )
+      .catch(error => {
+        console.log(error)
+        this.errorMsg = "No /calls found"
+      })
   },
 
   methods: {
     loginClicked: function() {
-      var url = 'http://hackathon.gobii.org:8081/gobii-dev/brapi/v1/token';
+      var url = 'http://ics.hutton.ac.uk/germinate-demo/cactuar-dev/brapi/v1/token';
       var data = { username: this.username, password: this.password, grant_type: "password", client_id: "flapjack-bytes"};
 
-      // Using fetch to get an access token so we can use brapi.js to talk to the brapi resource from here on out
-      fetch(url, {
-        method: 'POST',
-        mode: "no-cors",
-        body: JSON.stringify(data),
-        headers:{
-          'Content-Type': 'application/json'
-        }
-      }).then(
-        function(response) {
-          console.log('Success:', response)
-      }.bind(this))
-      .catch(error => console.error('Error:', error))
+      axios
+        .post(url, data, {headers: {"Content-Type": "application/json"}})
+        .then(function(response) {
+          console.log(response.data.access_token)
+
+          var brapiJs = brapi("https://ics.hutton.ac.uk/germinate-demo/cactuar-dev/brapi/v1", "1.3", response.data.access_token)
+
+          if (response.data.access_token) {
+            this.$store.dispatch('ON_BRAPI_SERVER_CHANGED', brapiJs)
+          }
+        }.bind(this)
+        ).catch(error => {
+          console.log(error)
+          this.errorMsg = "Unable to retrieve a list of folders.";
+        })
     }
   }
 }
