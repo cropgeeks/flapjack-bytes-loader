@@ -72,6 +72,7 @@ export default {
 
           if (response.data.access_token) {
             this.$store.dispatch('ON_BRAPI_SERVER_CHANGED', brapiJs)
+            this.$router.push({ name: 'options'})
           }
         }.bind(this)
         ).catch(error => {
