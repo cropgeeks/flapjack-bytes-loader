@@ -39,6 +39,37 @@ export default {
     }
   },
 
+  mounted: function() {
+
+    // axios
+    //   .get("http://hackathon.gobii.org:8081/gobii-dev/brapi/v1/calls", {}, {})
+    //   .then(
+    //     function(response) {
+    //       console.log(response)
+    //       this.$store.dispatch('ON_CALLS_CHANGED', response.data.result.data)
+    //     }.bind(this)
+    //   )
+    //   .catch(error => {
+    //     console.log(error)
+    //     this.errorMsg = "No /calls found";
+    //   });
+
+    var url = 'http://hackathon.gobii.org:8081/gobii-dev/brapi/v1/calls';
+
+      // Using fetch to get an access token so we can use brapi.js to talk to the brapi resource from here on out
+      fetch(url, {
+        method: 'GET',
+        mode: "no-cors",
+        headers:{
+          'Content-Type': 'application/json'
+        }
+      }).then(
+        function(response) {
+          console.log('Success:', response)
+      }.bind(this))
+      .catch(error => console.error('Error:', error))
+  },
+
   methods: {
     loginClicked: function() {
       var url = 'http://hackathon.gobii.org:8081/gobii-dev/brapi/v1/token';
@@ -54,7 +85,7 @@ export default {
         }
       }).then(
         function(response) {
-          console.log('Success:', JSON.stringify(response))
+          console.log('Success:', response)
       }.bind(this))
       .catch(error => console.error('Error:', error))
     }
