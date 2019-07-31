@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col-md-12">
         <div class="home-content">
-          <h1 class="mt-3">Flapjack Bytes Loader</h1>
+          <h3 class="mt-3">Flapjack Bytes Loader</h3>
           <b-row>
             <b-col md="2">
               <label for="username">Username:</label>
@@ -71,7 +71,7 @@ export default {
         .then(function(response) {
           console.log(response.data.access_token)
 
-          var brapiJs = brapi("https://ics.hutton.ac.uk/germinate-demo/cactuar-dev/brapi/v1", "1.3", response.data.access_token)
+          var brapiJs = brapi("https://ics.hutton.ac.uk/germinate-demo/cactuar-dev/brapi/v1", "1.2", response.data.access_token)
 
           if (response.data.access_token) {
             this.$store.dispatch('ON_BRAPI_SERVER_CHANGED', brapiJs)
