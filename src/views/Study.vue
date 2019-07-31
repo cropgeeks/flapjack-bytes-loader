@@ -8,9 +8,9 @@
     			<b-form-select v-model="selected" :options="options" :select-size="4"></b-form-select>
    				 <div class="mt-3">Selected: <strong>{{ selected }}</strong></div>
 
-				 <b-card no-body class="text-center">
+				 <b-card v-if="selected" no-body class="text-center">
    				 <div class="bg-secondary text-light">
-						{{ desc }}
+						{{ selected.name }}
    				 </div>
  				 </b-card>
   			</div>
@@ -25,19 +25,12 @@
 import { mapGetters } from 'vuex'
 import brapi from '@solgenomics/brapijs';
 
-  export default {
-    data() {
-      return {
-        selected: null,
-        options: [
-          { value: 'a', text: 'This is option a' },
-          { value: 'b', text: 'Default Selected Option b' },
-          { value: 'c', text: 'This is option c' },
-          { value: 'd', text: 'This one is disabled', disabled: true },
-          { value: 'e', text: 'This is option e' },
-          { value: 'e', text: 'This is option f' }
-		],
-		desc: selected.text
+	export default {
+		data: function () {
+			return {
+				selected: null,
+				options: [],
+				desc: null
       }
 	},
 
@@ -47,13 +40,26 @@ import brapi from '@solgenomics/brapijs';
 		])
 	},
 
-	mounted() {
+	mounted: function () {
 		var params = { studyType: "genotype"}
 		console.log(this.brapiServer)
-		this.brapiServer.search_studies(params, "fork", true).each((study) => {
-			console.log(JSON.stringify(study))
-			// options.push({ value: study.})
+		var vm = this
+		this.brapiServer.search_studies(params).each((study) => {
+			// console.log(vm)
+			// vm.options.push({ value: study.name, text: study.name})
+			vm.addOption(study)
+			// console.log(vm.options)
 		})
+	},
+
+	methods: {
+		addOption: function(option) {
+			var study = {
+				name: option.name,
+				startDate: option.startDate
+			}
+			this.options.push({text: study.name, value: study})
+		}
 	}
   }
 </script>

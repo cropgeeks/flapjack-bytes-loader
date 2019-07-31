@@ -63,7 +63,6 @@ export default {
 
   methods: {
     loginClicked: function() {
-      var url = 'http://minke.hutton.ac.uk:9002/germinate-demo/cactuar-dev/brapi/v1/token';
       var data = { username: this.username, password: this.password, grant_type: "password", client_id: "flapjack-bytes"};
 
       this.instance
