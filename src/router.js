@@ -47,6 +47,14 @@ const router = new Router({
       meta: {
         title: 'Flapjack Bytes Map',
       }
+    },
+    {
+      path: '/bytes',
+      name: 'bytes',
+      component: () => import('./views/Bytes.vue'),
+      meta: {
+        title: 'Flapjack Bytes Viewer',
+      }
     }
   ]
 })
