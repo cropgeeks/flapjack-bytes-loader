@@ -42,13 +42,9 @@ import brapi from '@solgenomics/brapijs';
 
 	mounted: function () {
 		var params = { studyType: "genotype"}
-		console.log(this.brapiServer)
 		var vm = this
 		this.brapiServer.search_studies(params).each((study) => {
-			// console.log(vm)
-			// vm.options.push({ value: study.name, text: study.name})
 			vm.addOption(study)
-			// console.log(vm.options)
 		})
 	},
 
@@ -61,5 +57,5 @@ import brapi from '@solgenomics/brapijs';
 			this.options.push({text: study.name, value: study})
 		}
 	}
-  }
+}
 </script>
