@@ -595,6 +595,12 @@
       }).catch(function (err) {
         console.log('Fetch Error :-S', err);
       });
+      var canvasHolder = document.getElementById(domParent.slice(1)); // Create the event.
+
+      var event = document.createEvent('FlapjackFinished'); // Define that the event name is 'build'.
+
+      event.initEvent('FlapjackFinished', true, true);
+      canvasHolder.dispatchEvent(event);
       return genotypeRenderer;
     };
 

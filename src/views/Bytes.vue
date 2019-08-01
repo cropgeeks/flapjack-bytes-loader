@@ -1,5 +1,11 @@
 <template>
-  <div id="bytes-div">
+  <div>
+    <div class="map-spinner d-flex justify-content-center h-100 align-items-center" v-if="showSpinner">
+      <b-spinner label="Loading..." variant="primary"></b-spinner>
+      <p>{{ message }}</p>
+    </div>
+    <div id="bytes-div" ref="bytes">
+    </div>
   </div>
 </template>
 
@@ -11,6 +17,8 @@ export default {
   name: 'home',
   data() {
     return {
+      showSpinner: true,
+      message: "Loading..."
     }
   },
 
@@ -25,6 +33,11 @@ export default {
   },
   
   mounted: function() {
+      var vm = this
+      this.$refs.bytes.addEventListener('FlapjackFinished', function (e) {
+        vm.showSpinner = false
+      }, false);
+
     var renderer = GenotypeRenderer();
     renderer.renderGenotypesBrapi("#bytes-div", 800, 600, this.baseUrl, this.matrixId, this.mapId, this.authToken);
   }
