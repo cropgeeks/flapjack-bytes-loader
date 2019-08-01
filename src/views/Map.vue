@@ -28,7 +28,6 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import brapi from '@solgenomics/brapijs';
 
 	export default {
 		data: function () {
@@ -50,8 +49,7 @@ import brapi from '@solgenomics/brapijs';
 
 	mounted: function () {
 		var vm = this
-		var brapiJs = brapi(this.baseUrl, "1.2", this.authToken)
-		brapiJs.maps().each((map) => {
+		this.getBrapiJs().maps().each((map) => {
 			vm.addOption(map)
 		})
 	},
