@@ -528,12 +528,14 @@
         'mapsDbId': mapId
       }; // let positions = [];
 
+      sendEvent("LoadingMap", domParent);
       brapiJs.maps_positions(params).each(function (marker) {
         markerNames.push(marker.markerName);
         var m = new Marker(marker.markerName, marker.linkageGroupName, parseInt(marker.location));
         markerData.push(m);
         chromosomes.add(marker.linkageGroupName);
       });
+      sendEvent("PollingMatrix", domParent);
       var matrixParams = {
         'matrixDbId': [matrixId],
         'format': 'flapjack'
@@ -595,12 +597,7 @@
       }).catch(function (err) {
         console.log('Fetch Error :-S', err);
       });
-      var canvasHolder = document.getElementById(domParent.slice(1)); // Create the event.
-
-      var event = document.createEvent('FlapjackFinished'); // Define that the event name is 'build'.
-
-      event.initEvent('FlapjackFinished', true, true);
-      canvasHolder.dispatchEvent(event);
+      sendEvent('FlapjackFinished', domParent);
       return genotypeRenderer;
     };
 
@@ -915,6 +912,14 @@
     function zoom(size) {
       setupColorStamps(size);
       genotypeCanvas.zoom(size, colorStamps);
+    }
+
+    function sendEvent(eventName, domParent) {
+      // TODO: Invesitgate using older event emitting code for IE support
+      var canvasHolder = document.getElementById(domParent.slice(1)); // Create the event.
+
+      var event = new Event(eventName);
+      canvasHolder.dispatchEvent(event);
     }
 
     return genotypeRenderer;
