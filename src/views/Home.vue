@@ -83,10 +83,7 @@ export default {
         .then(function(response) {
           this.$store.dispatch('ON_AUTH_TOKEN_CHANGED', response.data.access_token)
 
-          var brapiJs = brapi("https://ics.hutton.ac.uk/germinate-demo/cactuar-dev/brapi/v1", "1.2", response.data.access_token)
-
           if (response.data.access_token) {
-            this.$store.dispatch('ON_BRAPI_SERVER_CHANGED', brapiJs)
             this.unsuccessfulLogin=false;
             this.$router.push({ name: 'options'})
           }

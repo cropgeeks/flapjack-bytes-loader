@@ -13,7 +13,6 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import BrAPI from '@solgenomics/brapijs'
 
 export default {
   name: 'home',
@@ -26,7 +25,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'brapiServer',
       'matrixId',
       'mapId',
       'baseUrl',

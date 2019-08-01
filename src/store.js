@@ -1,14 +1,14 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import createPersistedState from 'vuex-persistedstate'
 
 Vue.use(Vuex)
 
-export default new Vuex.Store({
+const store = new Vuex.Store({
   state: {
     baseUrl: null,
     authToken: null,
     calls: null,
-    brapiServer: null,
     mapId: null,
     matrixId: null,
     selectedOptions: null,
@@ -18,7 +18,6 @@ export default new Vuex.Store({
     baseUrl: state => state.baseUrl,
     authToken: state => state.authToken,
     calls: state => state.calls,
-    brapiServer: state => state.brapiServer,
     mapId: state => state.mapId,
     matrixId: state => state.matrixId,
     selectedOptions: state => state.selectedOptions,
@@ -33,9 +32,6 @@ export default new Vuex.Store({
     },
     ON_CALLS_CHANGED_MUTATION: function (state, newCalls) {
       state.calls = newCalls
-    },
-    ON_BRAPI_SERVER_CHANGED_MUTATION: function (state, newBrapiServer) {
-      state.brapiServer = newBrapiServer
     },
     ON_MAP_ID_CHANGED_MUTATION: function (state, newMapId) {
       state.mapId = newMapId
@@ -60,9 +56,6 @@ export default new Vuex.Store({
     ON_CALLS_CHANGED: function ({ commit }, calls) {
       commit('ON_CALLS_CHANGED_MUTATION', calls)
     },
-    ON_BRAPI_SERVER_CHANGED: function ({ commit }, brapiServer) {
-      commit('ON_BRAPI_SERVER_CHANGED_MUTATION', brapiServer)
-    },
     ON_MAP_ID_CHANGED: function ({ commit }, mapId) {
       commit('ON_MAP_ID_CHANGED_MUTATION', mapId)
     },
@@ -75,5 +68,11 @@ export default new Vuex.Store({
     ON_STUDY_CHANGED: function({ commit }, selectedStudyId){
         commit('ON_STUDY_CHANGED_MUTATION', selectedStudyId)
     }
-  }
+  },
+
+  plugins: [
+    createPersistedState()
+  ]
 })
+
+export default store
