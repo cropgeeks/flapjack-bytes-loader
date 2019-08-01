@@ -77,7 +77,7 @@ import brapi from '@solgenomics/brapijs';
 		
     	navigateToNextPage(){
 
-			this.$store.dispatch('ON_MAP_CHANGED', this.options.id);
+			this.$store.dispatch('ON_MAP_ID_CHANGED', this.selectedMap.id);
 			//move on to matrix. It always comes after maps.
 			this.$router.push({ name: 'matrix'});
 		
