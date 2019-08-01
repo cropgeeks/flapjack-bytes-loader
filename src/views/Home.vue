@@ -3,6 +3,18 @@
     <div class="row">
       <div class="col-md-12">
         <div class="home-content">
+			
+          <b-row>  
+			<b-col md="2"></b-col>
+            <b-col md="8">
+                <b-alert
+               variant="danger"
+               dismissible
+               fade
+              :show="showDismissibleAlert"
+              @dismissed="showDismissibleAlert=false">Invalid username or password.</b-alert>
+            </b-col>
+          </b-row>
           <b-row>
 			<b-col md="2"></b-col>
             <b-col md="2">
@@ -22,8 +34,9 @@
               <b-form-input id="password" v-model="password" type="password"></b-form-input>
             </b-col>
           </b-row>
-         
+		  
 		   <div  v-if="unsuccessfulLogin" class="d-flex justify-content-center mb-3 mt-3">
+
 			    <b-button  variant="primary" @click="loginClicked">Login</b-button>
   		  </div>
 
@@ -49,7 +62,8 @@ export default {
       username: '',
       password: '',
 	  instance: null,
-	  unsuccessfulLogin: true
+	  unsuccessfulLogin: true,
+	  showDismissibleAlert: false
     }
   },
 
@@ -87,15 +101,20 @@ export default {
 
           if (response.data.access_token) {
             this.$store.dispatch('ON_BRAPI_SERVER_CHANGED', brapiJs)
-            this.unsuccessfulLogin=false;
+			this.unsuccessfulLogin=false;
             this.$router.push({ name: 'options'})
           }
         }.bind(this)
-        ).catch(error => {
+        ).catch(error => {	
           console.log(error)
-          this.errorMsg = "Unable to retrieve a list of folders.";
-        })
-    }
+		  this.errorMsg = "Unable to retrieve a list of folders.";
+			this.showAlert();
+		})
+    },
+		
+		showAlert() {
+        this.showDismissibleAlert = true;
+      	}
   }
 }
 </script>

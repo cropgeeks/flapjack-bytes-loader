@@ -10,8 +10,8 @@
           <div>
             <b-form-select v-model="selected" :options="options" :select-size="4"></b-form-select>
             <b-card v-if="selected" no-body class="mt-3">
-              <b-card-header class="bg-secondary text-white">
-                {{selected.name}}
+               <b-card-header class="bg-info text-white">
+               Details:{{selected.name}}
               </b-card-header>
               <b-card-body>
                 <p>Description: {{selected.description}}</p>

@@ -1,12 +1,17 @@
 <template>
 <div>
-
-<b-container class="bv-example-row">
-	
-	<b-row>
-		 <b-col cols="1"></b-col>
-		<b-col><b-alert show>Flapjack Bytes Loader</b-alert></b-col>
-	</b-row>
+<b-navbar toggleable="lg" type="dark" variant="info" md="2">
+<b-navbar-brand href="#">Flapjack Bytes</b-navbar-brand>
+</b-navbar-brand>
+</b-navbar>
+<div style="margin: 20px; padding: 20px;">
+<b-container class="bv-example-row" mt="2">
+ <b-row>
+    <b-col></b-col>
+    <b-col cols="8">
+		</b-col>
+    <b-col></b-col>
+  </b-row>
   <b-row>
     <b-col></b-col>
     <b-col cols="8">
@@ -21,6 +26,7 @@
     <b-col></b-col>
   </b-row>
 </b-container>
+</div>
 </div>
 </template>
 
