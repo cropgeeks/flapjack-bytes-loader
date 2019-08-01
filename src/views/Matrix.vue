@@ -45,7 +45,8 @@ import brapi from '@solgenomics/brapijs';
 
 	computed: {
 		...mapGetters([
-			'brapiServer',
+			'baseUrl',
+			'authToken',
 			'selectedOptions',
 			'selectedStudyId'
 		])
@@ -54,19 +55,17 @@ import brapi from '@solgenomics/brapijs';
 	mounted: function () {
 		
 		var vm = this
+		var brapiJs = brapi(this.baseUrl, "1.2", this.authToken)
 
 		if(this.selectedStudyId>0){
 
 			var params = { studyDbId: this.selectedStudyId}
-			this.brapiServer.allelematrices(params).each((matrix) => {
-			// console.log(vm)
-			// vm.options.push({ value: study.name, text: study.name})
+			
+			brapiJs.allelematrices(params).each((matrix) => {
 			vm.addOption(matrix)
 		})
 		}else {
-			this.brapiServer.allelematrices().each((matrix) => {
-			// console.log(vm)
-			// vm.options.push({ value: study.name, text: study.name})
+			brapiJs.allelematrices().each((matrix) => {
 			vm.addOption(matrix)
 		})
 		}

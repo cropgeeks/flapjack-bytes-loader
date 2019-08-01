@@ -2,9 +2,17 @@
 <div>
 <b-navbar toggleable="lg" type="dark" variant="info" md="2">
 <b-navbar-brand href="#">Flapjack Bytes</b-navbar-brand>
+ <b-navbar-nav class="ml-auto">
+<b-nav-item-dropdown right>
+          <template slot="button-content"><em>User</em></template>
+          <b-dropdown-item href="#">Profile</b-dropdown-item>
+          <b-dropdown-item href="http://localhost:8080/">Sign Out</b-dropdown-item>
+        </b-nav-item-dropdown>
 </b-navbar-brand>
+
+</b-navbar-nav>
 </b-navbar>
-<div style="margin: 20px; padding: 20px;">
+<div style="margin: 20px;">
 <b-container class="bv-example-row" mt="2">
  <b-row>
     <b-col></b-col>

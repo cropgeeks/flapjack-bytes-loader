@@ -42,15 +42,17 @@ import brapi from '@solgenomics/brapijs';
 
 	computed: {
 		...mapGetters([
-			'brapiServer',
-			'selectedOptions'
+			'selectedOptions',
+			'baseUrl',
+			'authToken'
 		])
 	},
 
 	mounted: function () {
 		var params = { studyType: "genotype"}
 		var vm = this
-		this.brapiServer.search_studies(params).each((study) => {
+		var brapiJs = brapi(this.baseUrl, "1.2", this.authToken)
+		brapiJs.search_studies(params).each((study) => {
 			vm.addOption(study)
 		})
 	},
