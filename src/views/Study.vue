@@ -1,23 +1,39 @@
 <template>
-  <div class=container>
-    <div class="row">
-      <div class="col-md-12">
-        <div class="home-content">
-          <h6 class="mt-3">Study</h6>
- 			 <div>
-    			<b-form-select v-model="selected" :options="options" :select-size="4"></b-form-select>
-   				 <div class="mt-3">Selected: <strong>{{ selected }}</strong></div>
-
-				 <b-card v-if="selected" no-body class="text-center">
-   				 <div class="bg-secondary text-light">
-						{{ selected.name }}
-   				 </div>
- 				 </b-card>
-  			</div>
-        </div>
-      </div>
-    </div>
-  </div>
+	<div>
+		<h5 class="mt-3">Study Selection</h5>
+		
+		<h6 class="mt-3">Available studies:</h6>
+    	<b-form-select v-model="selectedStudy" :options="options" :select-size="4" size="sm" class="mt-3"></b-form-select>
+		<div>
+		</div>
+		<div v-if="selectedStudy">
+          <b-row>
+			<b-col md="2">
+             <h6 class="mt-3">Details:</h6>
+            </b-col>
+          </b-row>	
+		  <b-row>
+			<b-col md="1">
+            </b-col>
+            <b-col md="10">
+              <label for="studyId">Study Id:</label>
+			  {{selectedStudy.id}}
+            </b-col>
+          </b-row>			
+		  <b-row>
+			<b-col md="1">
+            </b-col>
+			<b-col md="10">
+              <label for="studyId">Start Date:</label>
+				{{selectedStudy.startDate}}
+            </b-col>
+          </b-row>	
+		  
+   		</div>
+		   <div  class="d-flex justify-content-center mb-3 mt-1">
+			    <b-button  id="continueBtn"  v-if="selectedStudy" size="sm" variant="primary" @click="navigateToNextPage"> Continue</b-button>
+  		  </div>
+	</div>
 </template>
 
 
@@ -28,15 +44,17 @@ import brapi from '@solgenomics/brapijs';
 	export default {
 		data: function () {
 			return {
-				selected: null,
+				selectedStudy: null,
 				options: [],
-				desc: null
+				description: null,
+				isSomethingSelected: false
       }
 	},
 
 	computed: {
 		...mapGetters([
-			'brapiServer'
+			'brapiServer',
+			'selectedOptions'
 		])
 	},
 
@@ -56,10 +74,36 @@ import brapi from '@solgenomics/brapijs';
 		addOption: function(option) {
 			var study = {
 				name: option.name,
-				startDate: option.startDate
+				id: option.studyDbId,
+				startDate: option.startDate,
+				endDate: option.endDate,
+				programName: option.programName
 			}
 			this.options.push({text: study.name, value: study})
+			
+		},
+		
+    	navigateToNextPage(){
+
+			this.$store.dispatch('ON_STUDY_CHANGED', this.selectedStudy.id);
+			this.$router.push({ name: 'matrix'});
+		//if there are no options selected
+		if(this.selectedOptions.length>1){
+			
+			// if options selected are >2 then move on to map since this is the study page.
+				this.$router.push({ name: 'map'});
 		}
+		else{ // only one is selected
+			
+			// otherwise go to matrix
+				this.$router.push({ name: 'matrix'});
+		
+		}
+
+    	}
+
+
+
 	}
   }
 </script>

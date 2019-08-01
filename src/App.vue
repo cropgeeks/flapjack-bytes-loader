@@ -1,9 +1,27 @@
 <template>
+<div>
+
+<b-container class="bv-example-row">
+	
+	<b-row>
+		 <b-col cols="1"></b-col>
+		<b-col><b-alert show>Flapjack Bytes Loader</b-alert></b-col>
+	</b-row>
+  <b-row>
+    <b-col></b-col>
+    <b-col cols="8">
   <div id="app">
+	  
       <transition-page>
     		<router-view :key="$route.path"/>
 		</transition-page>
   </div>
+  
+		</b-col>
+    <b-col></b-col>
+  </b-row>
+</b-container>
+</div>
 </template>
 
 <script>

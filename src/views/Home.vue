@@ -3,25 +3,36 @@
     <div class="row">
       <div class="col-md-12">
         <div class="home-content">
-          <h3 class="mt-3">Flapjack Bytes Loader</h3>
           <b-row>
+			<b-col md="2"></b-col>
             <b-col md="2">
               <label for="username">Username:</label>
             </b-col>
-            <b-col md="10">
+            <b-col md="6">
               <b-form-input id="username" v-model="username" type="text"></b-form-input>
             </b-col>
           </b-row>
           <b-row>
+			  
+			<b-col md="2"></b-col>
             <b-col md="2">
               <label for="password">Password:</label>
             </b-col>
-            <b-col md="10">
+            <b-col md="6">
               <b-form-input id="password" v-model="password" type="password"></b-form-input>
             </b-col>
           </b-row>
-          <b-button variant="primary" @click="loginClicked">Login</b-button>
+         
+		   <div  v-if="unsuccessfulLogin" class="d-flex justify-content-center mb-3 mt-3">
+			    <b-button  variant="primary" @click="loginClicked">Login</b-button>
+  		  </div>
+
+		  <div v-else class="d-flex justify-content-center mb-3 mt-3">
+   			 <b-spinner label="Loading..." variant="primary"></b-spinner>
+  			</div>
+
         </div>
+		
       </div>
     </div>
   </div>
@@ -37,7 +48,8 @@ export default {
     return {
       username: '',
       password: '',
-      instance: null
+	  instance: null,
+	  unsuccessfulLogin: true
     }
   },
 
@@ -73,8 +85,9 @@ export default {
           var brapiJs = brapi("https://ics.hutton.ac.uk/germinate-demo/cactuar-dev/brapi/v1", "1.2", response.data.access_token)
 
           if (response.data.access_token) {
-            this.$store.dispatch('ON_BRAPI_SERVER_CHANGED', brapiJs)
-            this.$router.push({ name: 'options'})
+			this.$store.dispatch('ON_BRAPI_SERVER_CHANGED', brapiJs)
+			this.unsuccessfulLogin=false;
+			this.$router.push({ name: 'options'})
           }
         }.bind(this)
         ).catch(error => {

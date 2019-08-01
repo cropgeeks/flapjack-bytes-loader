@@ -1,10 +1,8 @@
 <template>
+<div>
+<h6 class="mt-3">Options:</h6>
  <b-container class="filter-row">
-   <b-row class="text-left">
-    <b-col></b-col>
-    <b-col cols="5">
-		
-	<b-form-group label="Options:">
+	<b-form-group >
       <b-form-checkbox-group
         v-model="selected"
         :options="options"
@@ -12,12 +10,11 @@
         stacked
       ></b-form-checkbox-group>
     </b-form-group>
-
-	<b-button variant="outline-primary" @click="navigateToNextPage">Continue</b-button>
-	</b-col>
-    <b-col></b-col>
-   </b-row>
+  <div  class="d-flex justify-content-center mb-3 mt-1">
+	<b-button size="sm" variant="primary" @click="navigateToNextPage">Continue</b-button>
+  </div>
 </b-container>
+</div>
 </template>
 
 <script>
@@ -38,15 +35,27 @@
 
 		//if there are no options selected
 		if(this.selected.length<1){
-			this.$router.push({ name: 'matrix', params: { selections: this.selected } });
+			this.$router.push({ name: 'matrix'});
 		}
 		else if(this.selected.length===1){ // only one is selected
-			if(this.selected[0]=="study") this.$router.push({ name: 'study', params: { selections: this.selected } });
-			else this.$router.push({ name: 'map', params: { selections: this.selected } });
-		}else //both is selected
-			this.$router.push({ name: 'study', params: { selections: this.selected } });
+			if(this.selected[0]=="study"){
+			
+			this.$router.push({ name: 'study'});
+
+			}
+			else{
+				this.$router.push({ name: 'map'});
+			}
+		
+			this.$store.dispatch('ON_OPTIONS_CHANGED', this.selected)
+			
+		}else{ //both is selected
+			this.$router.push({ name: 'study'});
+            this.$store.dispatch('ON_OPTIONS_CHANGED', this.selected)
 		}
-    }
+
+    	}
+	}
 }
-  
+
 </script>

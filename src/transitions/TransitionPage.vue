@@ -5,8 +5,8 @@
     :enter-active-class="transitionEnterActiveClass"
     @beforeLeave="beforeLeave"
     @enter="enter"
-    @afterEnter="afterEnter"
-  >
+    @afterEnter="afterEnter">
+
     <slot/>
   </transition>
 </template>
