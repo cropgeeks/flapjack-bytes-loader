@@ -7,7 +7,9 @@ export default new Vuex.Store({
   state: {
     baseUrl: null,
     calls: null,
-	brapiServer: null,
+    brapiServer: null,
+    mapId: null,
+    matrixId: null,
 	selectedOptions: null,
 	selectedStudyId: null,
 	selectedMapId: null,
@@ -16,7 +18,9 @@ export default new Vuex.Store({
   getters: {
     baseUrl: state => state.baseUrl,
     calls: state => state.calls,
-	brapiServer: state => state.brapiServer,
+    brapiServer: state => state.brapiServer,
+    mapId: state => state.mapId,
+	matrixId: state => state.matrixId,
 	selectedOptions: state => state.selectedOptions,
 	selectedStudyId: state => state.selectedStudyId,
 	selectedMapId: state => state.selectedMapId,
@@ -31,7 +35,13 @@ export default new Vuex.Store({
     },
     ON_BRAPI_SERVER_CHANGED_MUTATION: function (state, newBrapiServer) {
       state.brapiServer = newBrapiServer
-	},
+    },
+    ON_MAP_ID_CHANGED_MUTATION: function (state, newMapId) {
+      state.mapId = newMapId
+    },
+    ON_MATRIX_ID_CHANGED_MUTATION: function (state, newMatrixId) {
+      state.matrixId = newMatrixId
+    },
 	ON_OPTIONS_CHANGED_MUTATION: function(state, newSelectedOptions){
 		state.selectedOptions = newSelectedOptions
 	},
@@ -54,7 +64,13 @@ export default new Vuex.Store({
     },
     ON_BRAPI_SERVER_CHANGED: function ({ commit }, brapiServer) {
       commit('ON_BRAPI_SERVER_CHANGED_MUTATION', brapiServer)
-	},
+    },
+    ON_MAP_ID_CHANGED: function ({ commit }, mapId) {
+      commit('ON_BRAPI_SERVER_CHANGED_MUTATION', mapId)
+    },
+    ON_MATRIX_ID_CHANGED: function ({ commit }, matrixId) {
+      commit('ON_BRAPI_SERVER_CHANGED_MUTATION', matrixId)
+    },
 	ON_OPTIONS_CHANGED: function({ commit }, selectedOptions){
       commit('ON_OPTIONS_CHANGED_MUTATION', selectedOptions)
 	},

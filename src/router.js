@@ -22,7 +22,7 @@ const router = new Router({
       component: () => import('./views/Options.vue'),
       meta: {
         title: 'Flapjack Bytes Options',
-	  }
+	}
 	},
     {
       path: '/matrix',
@@ -46,6 +46,14 @@ const router = new Router({
       component: () => import('./views/Map.vue'),
       meta: {
         title: 'Flapjack Bytes Map',
+      }
+    },
+    {
+      path: '/bytes',
+      name: 'bytes',
+      component: () => import('./views/Bytes.vue'),
+      meta: {
+        title: 'Flapjack Bytes Viewer',
       }
     }
   ]

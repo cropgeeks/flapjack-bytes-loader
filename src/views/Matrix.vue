@@ -1,46 +1,33 @@
 <template>
-	<div>
+  <div class=container>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="home-content">
+         
 		<h5 class="mt-3">Matrix Selection</h5>
 		
 		<h6 class="mt-3">Available matrices:</h6>
-    	<b-form-select v-model="selectedMatrix" :options="options" :select-size="4" size="sm" class="mt-3"></b-form-select>
-		<div>
-		</div>
-		<div v-if="selectedMatrix" >
-          <b-row>
-			<b-col md="2">
-             <h6 class="mt-3">Details: </h6>
-            </b-col>
-          </b-row>	
-		  <b-row>
-			<b-col md="1">
-            </b-col>
-            <b-col md="10">
-              <label >Matrix Id: </label>
-			  {{selectedMatrix.id}}
-            </b-col>
-          </b-row>			
-		  <b-row>
-			<b-col md="1">
-            </b-col>
-			<b-col md="10">
-              <label >Study Id: </label>
-				{{selectedMatrix.studyId}}
-            </b-col>
-          </b-row>	
-		   <b-row>
-			<b-col md="1">
-            </b-col>
-			<b-col md="10">
-              <label >Last Updated: </label>
-				{{selectedMatrix.lastUpdated}}
-            </b-col>
-          </b-row>	
-   		</div>
-		   <div  class="d-flex justify-content-center mb-3 mt-1">
-			    <b-button  id="continueBtn"  v-if="selectedMatrix" size="sm" variant="primary" @click="navigateToNextPage"> Continue</b-button>
+          <div>
+            <b-form-select v-model="selected" :options="options" :select-size="4"></b-form-select>
+            <b-card v-if="selected" no-body class="mt-3">
+              <b-card-header class="bg-secondary text-white">
+                {{selected.name}}
+              </b-card-header>
+              <b-card-body>
+                <p>Description: {{selected.description}}</p>
+                <p>Last updated: {{selected.lastUpdated}}</p>
+              </b-card-body>
+            </b-card>
+            
+			<div  class="d-flex justify-content-center mb-3 mt-1">
+				<b-button  variant="primary" class="mt-3" @click="viewMatrix">View</b-button>
+				
   		  </div>
-	</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 
@@ -51,10 +38,8 @@ import brapi from '@solgenomics/brapijs';
 	export default {
 		data: function () {
 			return {
-				selectedMatrix: null,
+				selected: null,
 				options: [],
-				description: null,
-				isSomethingSelected: false
       }
 	},
 
@@ -104,8 +89,23 @@ import brapi from '@solgenomics/brapijs';
 
 			this.$router.push({ name: 'options'});
 		
-    	}
-
+		},
+		
+		addOption: function(option) {
+			var study = {
+        name: option.name,
+        matrixName: option.matrixName,
+				description: option.description,
+        lastUpdated: option.lastUpdated,
+        dbId: option.matrixDbId
+			}
+			this.options.push({text: study.name, value: study})
+    },
+    
+    viewMatrix: function() {
+      this.$store.dispatch('ON_MATRIX_ID_CHANGED', this.selected.dbId)
+      this.$router.push({ name: 'bytes'})
+    }
 	}
-  }
+}
 </script>

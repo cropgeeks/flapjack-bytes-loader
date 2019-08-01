@@ -6,29 +6,18 @@
     	<b-form-select v-model="selectedStudy" :options="options" :select-size="4" size="sm" class="mt-3"></b-form-select>
 		<div>
 		</div>
+		
 		<div v-if="selectedStudy">
-          <b-row>
-			<b-col md="2">
-             <h6 class="mt-3">Details:</h6>
-            </b-col>
-          </b-row>	
-		  <b-row>
-			<b-col md="1">
-            </b-col>
-            <b-col md="10">
-              <label for="studyId">Study Id:</label>
-			  {{selectedStudy.id}}
-            </b-col>
-          </b-row>			
-		  <b-row>
-			<b-col md="1">
-            </b-col>
-			<b-col md="10">
-              <label for="studyId">Start Date:</label>
-				{{selectedStudy.startDate}}
-            </b-col>
-          </b-row>	
-		  
+			 <b-card no-body class="mt-3">
+              <b-card-header class="bg-secondary text-white">
+                {{selectedStudy.name}}
+              </b-card-header>
+              <b-card-body>
+                <p>Study Id:  {{selectedStudy.id}}</p>
+                <p>Start Date: {{selectedStudy.startDate}}</p>
+              </b-card-body>
+            </b-card>
+          
    		</div>
 		   <div  class="d-flex justify-content-center mb-3 mt-1">
 			    <b-button  id="continueBtn"  v-if="selectedStudy" size="sm" variant="primary" @click="navigateToNextPage"> Continue</b-button>
@@ -60,13 +49,9 @@ import brapi from '@solgenomics/brapijs';
 
 	mounted: function () {
 		var params = { studyType: "genotype"}
-		console.log(this.brapiServer)
 		var vm = this
 		this.brapiServer.search_studies(params).each((study) => {
-			// console.log(vm)
-			// vm.options.push({ value: study.name, text: study.name})
 			vm.addOption(study)
-			// console.log(vm.options)
 		})
 	},
 
@@ -105,5 +90,5 @@ import brapi from '@solgenomics/brapijs';
 
 
 	}
-  }
+}
 </script>

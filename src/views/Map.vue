@@ -7,67 +7,16 @@
 		<div>
 		</div>
 		<div v-if="selectedMap" >
-          <b-row>
-			<b-col md="2">
-             <h6 class="mt-3">Details: </h6>
-            </b-col>
-          </b-row>	
-		  <b-row>
-			<b-col md="1">
-            </b-col>
-            <b-col md="10">
-              <label >Map Id: </label>
-			  {{selectedMap.id}}
-            </b-col>
-          </b-row>			
-		  <b-row>
-			<b-col md="1">
-            </b-col>
-			<b-col md="10">
-              <label >Species: </label>
-				{{selectedMap.species}}
-            </b-col>
-          </b-row>	
-		   <b-row>
-			<b-col md="1">
-            </b-col>
-			<b-col md="10">
-              <label >Type: </label>
-				{{selectedMap.type}}
-            </b-col>
-          </b-row>	
-		   <b-row>
-			<b-col md="1">
-            </b-col>
-			<b-col md="10">
-              <label >Unit: </label>
-				{{selectedMap.unit}}
-            </b-col>
-          </b-row>	
-		   <b-row>
-			<b-col md="1">
-            </b-col>
-			<b-col md="10">
-              <label >Publish date: </label>
-				{{selectedMap.date}}
-            </b-col>
-          </b-row>	
-		   <b-row>
-			<b-col md="1">
-            </b-col>
-			<b-col md="10">
-              <label >Markers: </label>
-				{{selectedMap.markers}}
-            </b-col>
-          </b-row>	
-		   <b-row>
-			<b-col md="1">
-            </b-col>
-			<b-col md="10">
-              <label label-size="sm" >Chromosomes: </label>
-				 {{selectedMap.chromosomes}}
-            </b-col>
-          </b-row>	
+			<b-card no-body class="mt-3">
+              <b-card-header class="bg-secondary text-white">
+                {{selectedMap.name}}
+              </b-card-header>
+              <b-card-body>
+                <p>Map Id:  {{selectedMap.id}}</p>
+                <p>Markers: {{selectedMap.markers}}</p>
+                <p>Chromosomes: {{selectedMap.chromosomes}}</p>
+              </b-card-body>
+            </b-card>
 		  
    		</div>
 		   <div  class="d-flex justify-content-center mb-3 mt-1">
