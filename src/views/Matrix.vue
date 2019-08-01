@@ -97,7 +97,7 @@ import brapi from '@solgenomics/brapijs';
         matrixName: option.matrixName,
 				description: option.description,
         lastUpdated: option.lastUpdated,
-        dbId: option.matrixDbId
+				dbId: option.matrixDbId
 			}
 			this.options.push({text: study.name, value: study})
     },

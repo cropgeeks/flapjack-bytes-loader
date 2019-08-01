@@ -1,24 +1,11 @@
 <template>
-  <div class=container>
-    <div class="row">
-      <div class="col-md-12">
-        <div class="bytes-div">
-          <h4>Flapajck Bytes Visualization</h4>
-		  
-            
-			<div  class="d-flex justify-content-center mb-3 mt-1">
-				
-				<b-button  variant="primary" class="mt-3" @click="navigateToNextPage">Back</b-button>
-  		  </div>
-        </div>
-      </div>
-    </div>
+  <div id="bytes-div">
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import brapi from '@solgenomics/brapijs'
+import BrAPI from '@solgenomics/brapijs'
 
 export default {
   name: 'home',
@@ -27,21 +14,20 @@ export default {
     }
   },
 
-	computed: {
-		...mapGetters([
-			'brapiServer'
+  computed: {
+    ...mapGetters([
+      'brapiServer',
+      'matrixId',
+      'mapId',
+      'baseUrl',
+      'authToken'
 		])
-	},
-
-	
-	methods: {
-    	navigateToNextPage(){
-
-			this.$router.push({ name: 'options'});
-		
-    	}
-
-	}
+  },
+  
+  mounted: function() {
+    var renderer = GenotypeRenderer();
+    renderer.renderGenotypesBrapi("#bytes-div", 800, 600, this.baseUrl, this.matrixId, this.mapId, this.authToken);
+  }
 }
 </script>
 
