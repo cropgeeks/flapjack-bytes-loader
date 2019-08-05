@@ -10,8 +10,8 @@
           <div>
             <b-form-select v-model="selected" :options="options" :select-size="4"></b-form-select>
             <b-card v-if="selected" no-body class="mt-3">
-              <b-card-header class="bg-secondary text-white">
-                {{selected.name}}
+               <b-card-header class="bg-info text-white">
+               Details:{{selected.name}}
               </b-card-header>
               <b-card-body>
                 <p>Description: {{selected.description}}</p>
@@ -33,7 +33,6 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import brapi from '@solgenomics/brapijs';
 
 	export default {
 		data: function () {
@@ -55,17 +54,15 @@ import brapi from '@solgenomics/brapijs';
 	mounted: function () {
 		
 		var vm = this
-		var brapiJs = brapi(this.baseUrl, "1.2", this.authToken)
-
 		if(this.selectedStudyId>0){
 
 			var params = { studyDbId: this.selectedStudyId}
 			
-			brapiJs.allelematrices(params).each((matrix) => {
+			this.getBrapiJs().allelematrices(params).each((matrix) => {
 			vm.addOption(matrix)
 		})
 		}else {
-			brapiJs.allelematrices().each((matrix) => {
+			this.getBrapiJs().allelematrices().each((matrix) => {
 			vm.addOption(matrix)
 		})
 		}

@@ -9,6 +9,10 @@ import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+import brapiapi from './mixins/brapiapi.js'
+
+Vue.mixin(brapiapi)
+
 Vue.use(BootstrapVue)
 Vue.use(Vuex)
 

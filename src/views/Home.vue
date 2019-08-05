@@ -3,6 +3,18 @@
     <div class="row">
       <div class="col-md-12">
         <div class="home-content">
+			
+          <b-row>  
+			<b-col md="2"></b-col>
+            <b-col md="8">
+                <b-alert
+               variant="danger"
+               dismissible
+               fade
+              :show="showDismissibleAlert"
+              @dismissed="showDismissibleAlert=false">Invalid username or password.</b-alert>
+            </b-col>
+          </b-row>
           <b-row>
 			<b-col md="2"></b-col>
             <b-col md="2">
@@ -22,8 +34,9 @@
               <b-form-input id="password" v-model="password" type="password"></b-form-input>
             </b-col>
           </b-row>
-         
+		  
 		   <div  v-if="unsuccessfulLogin" class="d-flex justify-content-center mb-3 mt-3">
+
 			    <b-button  variant="primary" @click="loginClicked">Login</b-button>
   		  </div>
 
@@ -49,14 +62,16 @@ export default {
       username: '',
       password: '',
 	  instance: null,
-	  unsuccessfulLogin: true
+	  unsuccessfulLogin: true,
+	  showDismissibleAlert: false
     }
   },
 
   mounted: function() {
+    this.baseUrl = 'https://ics.hutton.ac.uk/germinate-demo/cactuar-dev/brapi/v1'
 
-    this.instance = axios.create({baseURL: 'https://ics.hutton.ac.uk/germinate-demo/cactuar-dev/brapi/v1'});
-    this.$store.dispatch('ON_BASE_URL_CHANGED', 'https://ics.hutton.ac.uk/germinate-demo/cactuar-dev/brapi/v1')
+    this.instance = axios.create({baseURL: this.baseUrl});
+    this.$store.dispatch('ON_BASE_URL_CHANGED', this.baseUrl)
 
     // Change to the below baseurl when the gobii instance is ready
     // http://hackathon.gobii.org:8081/gobii-dev/brapi/v1
@@ -84,15 +99,22 @@ export default {
           this.$store.dispatch('ON_AUTH_TOKEN_CHANGED', response.data.access_token)
 
           if (response.data.access_token) {
+            this.initBrapiJs(this.baseUrl, response.data.access_token)
+
             this.unsuccessfulLogin=false;
             this.$router.push({ name: 'options'})
           }
         }.bind(this)
-        ).catch(error => {
+        ).catch(error => {	
           console.log(error)
-          this.errorMsg = "Unable to retrieve a list of folders.";
-        })
-    }
+		  this.errorMsg = "Unable to retrieve a list of folders.";
+			this.showAlert();
+		})
+    },
+		
+		showAlert() {
+        this.showDismissibleAlert = true;
+      	}
   }
 }
 </script>

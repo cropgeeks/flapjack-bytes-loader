@@ -9,8 +9,8 @@
 		
 		<div v-if="selectedStudy">
 			 <b-card no-body class="mt-3">
-              <b-card-header class="bg-secondary text-white">
-                {{selectedStudy.name}}
+              <b-card-header class="bg-info text-white">
+               Details: {{selectedStudy.name}}
               </b-card-header>
               <b-card-body>
                 <p>Study Id:  {{selectedStudy.id}}</p>
@@ -28,7 +28,6 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import brapi from '@solgenomics/brapijs';
 
 	export default {
 		data: function () {
@@ -51,8 +50,7 @@ import brapi from '@solgenomics/brapijs';
 	mounted: function () {
 		var params = { studyType: "genotype"}
 		var vm = this
-		var brapiJs = brapi(this.baseUrl, "1.2", this.authToken)
-		brapiJs.search_studies(params).each((study) => {
+		this.getBrapiJs().search_studies(params).each((study) => {
 			vm.addOption(study)
 		})
 	},
