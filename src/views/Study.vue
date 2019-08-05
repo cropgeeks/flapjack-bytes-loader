@@ -9,8 +9,8 @@
 		
 		<div v-if="selectedStudy">
 			 <b-card no-body class="mt-3">
-              <b-card-header class="bg-secondary text-white">
-                {{selectedStudy.name}}
+              <b-card-header class="bg-info text-white">
+               Details: {{selectedStudy.name}}
               </b-card-header>
               <b-card-body>
                 <p>Study Id:  {{selectedStudy.id}}</p>

@@ -79,6 +79,11 @@ export default {
 </script>
 
 <style lang="scss">
+
+p {
+    font-size: small;
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition-duration: 0.3s;

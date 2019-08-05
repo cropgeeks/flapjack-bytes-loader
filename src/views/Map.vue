@@ -6,10 +6,13 @@
     	<b-form-select v-model="selectedMap" :options="options" :select-size="4" size="sm" class="mt-3"></b-form-select>
 		<div>
 		</div>
+
+
+		
 		<div v-if="selectedMap" >
 			<b-card no-body class="mt-3">
-              <b-card-header class="bg-secondary text-white">
-                {{selectedMap.name}}
+              <b-card-header class="bg-info text-white">
+               Details: {{selectedMap.name}}
               </b-card-header>
               <b-card-body>
                 <p>Map Id:  {{selectedMap.id}}</p>
