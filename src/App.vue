@@ -1,36 +1,38 @@
 <template>
-  <div>
-    <b-container class="bv-example-row">
-      <b-row>
-        <b-col cols="1"></b-col>
-        <b-col>
-          <b-alert show>Flapjack Bytes Loader</b-alert>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col></b-col>
-        <b-col cols="8">
-          <div id="app">
-            <transition-page>
-              <router-view :key="$route.path" />
-            </transition-page>
-          </div>
-        </b-col>
-        <b-col></b-col>
-      </b-row>
-    </b-container>
+<div>
+
+<b-container class="bv-example-row">
+	
+	<b-row>
+		 <b-col cols="1"></b-col>
+		<b-col><b-alert show>Flapjack Bytes Loader</b-alert></b-col>
+	</b-row>
+  <b-row>
+    <b-col></b-col>
+    <b-col cols="8">
+  <div id="app">
+	  
+      <transition-page>
+    		<router-view :key="$route.path"/>
+		</transition-page>
   </div>
+  
+		</b-col>
+    <b-col></b-col>
+  </b-row>
+</b-container>
+</div>
 </template>
 
 <script>
-import TransitionPage from "./transitions/TransitionPage.vue";
+import TransitionPage from './transitions/TransitionPage.vue';
 
 export default {
-  name: "app",
+  name: 'app',
   components: {
-    TransitionPage
-  }
-};
+    TransitionPage,
+  },
+}
 </script>
 
 <style lang="scss">
@@ -42,9 +44,8 @@ export default {
 html {
   line-height: 1.6;
   color: #333;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 }
 
 p {
