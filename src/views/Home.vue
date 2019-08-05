@@ -49,7 +49,6 @@
 
 <script>
 import axios from "axios";
-import brapi from "@solgenomics/brapijs";
 
 export default {
   name: "home",
