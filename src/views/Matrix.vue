@@ -67,29 +67,19 @@ export default {
   },
 
   methods: {
-    addOption: function(option) {
-      var matrix = {
-        name: option.name,
-        id: option.matrixDbId,
-        studyId: option.studyDbId,
-        lastUpdated: option.lastUpdated
-      };
-      this.options.push({ text: matrix.name, value: matrix });
-    },
-
     navigateToNextPage() {
       this.$router.push({ name: "options" });
     },
 
     addOption: function(option) {
-      var study = {
+      var matrix = {
         name: option.name,
         matrixName: option.matrixName,
         description: option.description,
         lastUpdated: option.lastUpdated,
         dbId: option.matrixDbId
       };
-      this.options.push({ text: study.name, value: study });
+      this.options.push({ text: matrix.name, value: matrix });
     },
 
     viewMatrix: function() {
