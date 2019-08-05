@@ -79,9 +79,7 @@ export default {
           this.$store.dispatch("ON_CALLS_CHANGED", response.data.result.data);
         }.bind(this)
       )
-      .catch(error => {
-        console.log(error);
-        this.errorMsg = "No /calls found";
+      .catch(() => {
       });
   },
 
@@ -113,9 +111,7 @@ export default {
             }
           }.bind(this)
         )
-        .catch(error => {
-          console.log(error);
-          this.errorMsg = "Unable to retrieve a list of folders.";
+        .catch(() => {
           this.showAlert();
         });
     },
