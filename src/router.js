@@ -3,8 +3,7 @@ import Router from 'vue-router'
 
 Vue.use(Router)
 
-// const vsnHost = process.env.VUE_APP_VSNI_BASE
-// const jhiHost = process.env.VUE_APP_JHI_BASE
+const brapiBaseUrl = process.env.VUE_APP_BRAPI_BASE
 
 const router = new Router({
   routes: [
@@ -14,6 +13,9 @@ const router = new Router({
       component: () => import('./views/Home.vue'),
       meta: {
         title: 'Flapjack Bytes Loader',
+      },
+      props: {
+        brapiBase: brapiBaseUrl
       }
     },
     {
