@@ -68,9 +68,10 @@ export default {
   },
 
   mounted: function() {
+    this.baseUrl = 'https://ics.hutton.ac.uk/germinate-demo/cactuar-dev/brapi/v1'
 
-    this.instance = axios.create({baseURL: 'https://ics.hutton.ac.uk/germinate-demo/cactuar-dev/brapi/v1'});
-    this.$store.dispatch('ON_BASE_URL_CHANGED', 'https://ics.hutton.ac.uk/germinate-demo/cactuar-dev/brapi/v1')
+    this.instance = axios.create({baseURL: this.baseUrl});
+    this.$store.dispatch('ON_BASE_URL_CHANGED', this.baseUrl)
 
     // Change to the below baseurl when the gobii instance is ready
     // http://hackathon.gobii.org:8081/gobii-dev/brapi/v1
@@ -98,7 +99,9 @@ export default {
           this.$store.dispatch('ON_AUTH_TOKEN_CHANGED', response.data.access_token)
 
           if (response.data.access_token) {
-			this.unsuccessfulLogin=false;
+            this.initBrapiJs(this.baseUrl, response.data.access_token)
+
+            this.unsuccessfulLogin=false;
             this.$router.push({ name: 'options'})
           }
         }.bind(this)
