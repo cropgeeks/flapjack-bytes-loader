@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h5 class="mt-3">Study Selection</h5>
+    <h5 class="mt-5">Study Selection</h5>
 
     <h6 class="mt-3">Available studies:</h6>
     <b-form-select
@@ -63,14 +63,19 @@ export default {
 
   methods: {
     addOption: function(option) {
-      var study = {
-        name: option.name,
-        id: option.studyDbId,
-        startDate: option.startDate,
-        endDate: option.endDate,
-        programName: option.programName
-      };
-      this.options.push({ text: study.name, value: study });
+      if("data" in option) {
+			  for(var i = 0; i < option.data.length; i++) {
+			  	var study_in = option.data[i];   
+			  	var study = {
+					name: study_in.name,
+					id: study_in.studyDbId,
+					startDate: study_in.startDate,
+					endDate: study_in.endDate,
+					programName: study_in.programName
+				};
+				this.options.push({text: study.name, value: study})
+			  }
+			}
     },
 
     navigateToNextPage() {

@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <h6 class="mt-3">Options:</h6>
+  <div class="mt-5"> 
+    <h5 class="mt-5">Options:</h5>
     <b-container class="filter-row">
       <b-form-group>
         <b-form-checkbox-group v-model="selected" :options="options" switches stacked></b-form-checkbox-group>

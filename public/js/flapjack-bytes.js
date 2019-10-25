@@ -824,15 +824,38 @@
             var stamp = new ColorState(buffer);
             colorStamps.push(stamp);
           } else {
-            var alleles = key.split('/');
-            var nucleotide1 = nucleotides.get(alleles[0]);
-            var nucleotide2 = nucleotides.get(alleles[1]);
+            if (key.length === 2) {
+              var nucleotide1 = nucleotides.get(key[0]);
+              var nucleotide2 = nucleotides.get(key[1]);
 
-            var _buffer = drawHetSquare(size, nucleotide1, nucleotide2);
+              var _buffer = void 0;
 
-            var _stamp = new ColorState(_buffer);
+              if (key[0] === key[1]) {
+                if (key[0] === "N") {
+                  nucleotide1 = nucleotides.get('');
+                }
 
-            colorStamps.push(_stamp);
+                _buffer = drawGradientSquare(size, nucleotide1);
+              } else {
+                _buffer = drawHetSquare(size, nucleotide1, nucleotide2);
+              }
+
+              var _stamp = new ColorState(_buffer);
+
+              colorStamps.push(_stamp);
+            } else {
+              var alleles = key.split('/');
+
+              var _nucleotide = nucleotides.get(alleles[0]);
+
+              var _nucleotide2 = nucleotides.get(alleles[1]);
+
+              var _buffer2 = drawHetSquare(size, _nucleotide, _nucleotide2);
+
+              var _stamp2 = new ColorState(_buffer2);
+
+              colorStamps.push(_stamp2);
+            }
           }
         }
       } catch (err) {

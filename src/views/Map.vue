@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h5 class="mt-3">Map Selection</h5>
+    <h5 class="mt-5">Map Selection</h5>
 
     <h6 class="mt-3">Available maps:</h6>
     <b-form-select v-model="selectedMap" :options="options" :select-size="4" size="sm" class="mt-3"></b-form-select>
@@ -58,7 +58,7 @@ export default {
   methods: {
     addOption: function(option) {
       var map = {
-        name: option.name,
+        name: option.mapName,
         id: option.mapDbId,
         species: option.species,
         type: option.type,

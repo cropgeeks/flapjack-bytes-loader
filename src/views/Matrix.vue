@@ -72,14 +72,18 @@ export default {
     },
 
     addOption: function(option) {
-      var matrix = {
-        name: option.name,
-        matrixName: option.matrixName,
-        description: option.description,
-        lastUpdated: option.lastUpdated,
-        dbId: option.matrixDbId
-      };
-      this.options.push({ text: matrix.name, value: matrix });
+      if("data" in option) {
+	     for(var i = 0; i < option.data.length; i++) {
+		    var ds_in = option.data[i];   
+	  	  	  var matrix = {
+			    name: ds_in.name,
+			    description: ds_in.description,
+                dbId: ds_in.matrixDbId,
+			    lastUpdated: ds_in.lastUpdated
+			  };
+			this.options.push({text: matrix.name, value: matrix});
+		  }
+	   }
     },
 
     viewMatrix: function() {

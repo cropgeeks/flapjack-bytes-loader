@@ -3,7 +3,9 @@ import Router from 'vue-router'
 
 Vue.use(Router)
 
-const brapiBaseUrl = process.env.VUE_APP_BRAPI_BASE
+const brapiBaseUrl = "http://3.15.189.111:8081/gobii-dev/brapi/v1";
+//= "http://cbsugobiixvm11.biohpc.cornell.edu:8081/gobii-dev/brapi/v1";
+	//"http://3.15.189.111:8081/gobii-dev/brapi/v1";
 
 const router = new Router({
   routes: [
@@ -34,7 +36,7 @@ const router = new Router({
         title: 'Flapjack Bytes Matrix',
       }
     },
-    {
+    { 
       path: '/study',
       name: 'study',
       component: () => import('./views/Study.vue'),
