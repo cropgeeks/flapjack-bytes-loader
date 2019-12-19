@@ -1,23 +1,24 @@
 import store from '../store.js'
-import brapi from '@solgenomics/brapijs';
+import axios from 'axios'
 
-var brapiJs = null
+var client = null
 
 export default {
   methods: {
-    initBrapiJs: function (baseUrl, authToken) {
-      brapiJs = brapi(baseUrl, "1.2", authToken)
+    initAxios: function(baseUrl, authToken) {
+      client = axios.create({ baseURL: baseUrl })
+      client.defaults.headers.common['Authorization'] = 'Bearer ' + authToken
     },
-    getBrapiJs: function () {
-      return brapiJs
+    getClient: function () {
+      return client;
     }
   },
   mounted: function () {
     const baseUrl = store.getters.baseUrl
     const authToken = store.getters.authToken
 
-    if (!brapiJs && baseUrl && authToken) {
-      this.initBrapiJs(baseUrl, authToken)
+    if (!client && baseUrl && authToken) {
+      this.initAxios(baseUrl, authToken)
     }
   }
 }

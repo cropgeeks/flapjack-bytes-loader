@@ -66,16 +66,6 @@ export default {
   mounted: function() {
     this.instance = axios.create({ baseURL: this.brapiBase });
     this.$store.dispatch("ON_BASE_URL_CHANGED", this.brapiBase);
-
-    this.instance
-      .get("/calls", {}, {})
-      .then(
-        function(response) {
-          this.$store.dispatch("ON_CALLS_CHANGED", response.data.result.data);
-        }.bind(this)
-      )
-      .catch(() => {
-      });
   },
 
   methods: {
@@ -99,10 +89,8 @@ export default {
             );
 
             if (response.data.access_token) {
-              this.initBrapiJs(this.brapiBase, response.data.access_token);
-
               this.unsuccessfulLogin = false;
-              this.$router.push({ name: "options" });
+              this.$router.push({ name: "matrix" });
             }
           }.bind(this)
         )

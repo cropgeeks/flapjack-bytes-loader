@@ -7,12 +7,13 @@
 
           <h6 class="mt-3">Available matrices:</h6>
           <div>
-            <b-form-select v-model="selected" :options="options" :select-size="4"></b-form-select>
+            <b-form-select v-model="selected" :options="options"></b-form-select>
             <b-card v-if="selected" no-body class="mt-3">
-              <b-card-header class="bg-info text-white">Details:{{selected.name}}</b-card-header>
+              <b-card-header class="bg-info text-white">Details: {{selected.variantSetName}}</b-card-header>
               <b-card-body>
-                <p>Description: {{selected.description}}</p>
-                <p>Last updated: {{selected.lastUpdated}}</p>
+                <p>Study name: {{selected.studyName}}</p>
+                <p>Samples: {{selected.callSetCount}}</p>
+                <p>Markers: {{selected.variantCount}}</p>
               </b-card-body>
             </b-card>
 
@@ -29,6 +30,7 @@
 
 <script>
 import { mapGetters } from "vuex";
+import axios from "axios";
 
 export default {
   data: function() {
@@ -49,41 +51,33 @@ export default {
 
   mounted: function() {
     var vm = this;
-    if (this.selectedStudyId > 0) {
-      var params = { studyDbId: this.selectedStudyId };
 
-      this.getBrapiJs()
-        .allelematrices(params)
-        .each(matrix => {
-          vm.addOption(matrix);
-        });
-    } else {
-      this.getBrapiJs()
-        .allelematrices()
-        .each(matrix => {
-          vm.addOption(matrix);
-        });
-    }
+    const client = axios.create({ baseURL: this.baseUrl })
+    client.defaults.headers.common['Authorization'] = 'Bearer ' + this.authToken
+
+    client.get("/variantsets", {},
+    {
+      headers: { "Content-Type": "application/json",
+      Authorization: "Bearer " + this.authToken }
+    }).then(response => {
+      const resp = response.data
+      resp.result.data.forEach(matrix => {
+        vm.addOption(matrix)
+      })
+    })
   },
 
   methods: {
-    navigateToNextPage() {
-      this.$router.push({ name: "options" });
-    },
+    // navigateToNextPage() {
+    //   this.$router.push({ name: "bytes" });
+    // },
 
     addOption: function(option) {
-      var matrix = {
-        name: option.name,
-        matrixName: option.matrixName,
-        description: option.description,
-        lastUpdated: option.lastUpdated,
-        dbId: option.matrixDbId
-      };
-      this.options.push({ text: matrix.name, value: matrix });
+      this.options.push({ text: option.variantSetName, value: option });
     },
 
     viewMatrix: function() {
-      this.$store.dispatch("ON_MATRIX_ID_CHANGED", this.selected.dbId);
+      this.$store.dispatch("ON_MATRIX_ID_CHANGED", this.selected.variantSetDbId);
       this.$router.push({ name: "bytes" });
     }
   }

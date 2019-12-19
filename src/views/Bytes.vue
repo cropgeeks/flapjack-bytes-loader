@@ -52,6 +52,15 @@ export default {
       },
       false
     );
+    this.$refs.bytes.addEventListener(
+      "FlapjackError",
+      function(e) {
+        vm.showSpinner = false;
+        alert("An unexpected error occured");
+        var elem = document.querySelector('#zoom-holder');
+        elem.parentNode.removeChild(elem);
+      }
+    )
 
     var renderer = GenotypeRenderer();
     renderer.renderGenotypesBrapi(

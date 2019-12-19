@@ -8,11 +8,13 @@
 
     <div v-if="selectedMap">
       <b-card no-body class="mt-3">
-        <b-card-header class="bg-info text-white">Details: {{selectedMap.name}}</b-card-header>
+        <b-card-header class="bg-info text-white">Details: {{selectedMap.mapName}}</b-card-header>
         <b-card-body>
-          <p>Map Id: {{selectedMap.id}}</p>
-          <p>Markers: {{selectedMap.markers}}</p>
-          <p>Chromosomes: {{selectedMap.chromosomes}}</p>
+          <p>Map Id: {{selectedMap.mapDbId}}</p>
+          <p>Type: {{selectedMap.type}}</p>
+          <p>Unit: {{selectedMap.unit}}</p>
+          <p>Markers: {{selectedMap.markerCount}}</p>
+          <p>Chromosomes: {{selectedMap.linkageGroupCount}}</p>
         </b-card-body>
       </b-card>
     </div>
@@ -31,6 +33,7 @@
 
 <script>
 import { mapGetters } from "vuex";
+import axios from "axios";
 
 export default {
   data: function() {
@@ -48,26 +51,26 @@ export default {
 
   mounted: function() {
     var vm = this;
-    this.getBrapiJs()
-      .maps()
-      .each(map => {
-        vm.addOption(map);
-      });
+
+    const client = axios.create({ baseURL: this.baseUrl })
+    client.defaults.headers.common['Authorization'] = 'Bearer ' + this.authToken
+
+    client.get("/maps", {}, 
+    {
+      headers: { "Content-Type": "application/json",
+      Authorization: "Bearer " + this.authToken }
+    }).then(response => {
+      const resp = response.data
+      resp.result.data.forEach(map => {
+        console.log(map)
+        vm.addOption(map)
+      })
+    })
   },
 
   methods: {
     addOption: function(option) {
-      var map = {
-        name: option.name,
-        id: option.mapDbId,
-        species: option.species,
-        type: option.type,
-        unit: option.unit,
-        date: option.publishedDate,
-        markers: option.markerCount,
-        chromosomes: option.linkageGroupCount
-      };
-      this.options.push({ text: map.name, value: map });
+      this.options.push({ text: option.mapName, value: option });
     },
 
     navigateToNextPage() {
