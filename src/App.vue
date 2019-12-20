@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-navbar toggleable="lg" type="dark" variant="info" md="2">
-      <b-navbar-brand href="#">Flapjack Bytes</b-navbar-brand>
+      <router-link to="/"><b-navbar-brand>Flapjack Bytes</b-navbar-brand></router-link>
     </b-navbar>
     <div style="margin: 20px;">
       <b-container class="bv-example-row" mt="2">
