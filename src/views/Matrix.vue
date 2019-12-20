@@ -3,9 +3,9 @@
     <div class="row">
       <div class="col-md-12">
         <div class="home-content">
-          <h5 class="mt-3">Matrix Selection</h5>
+          <h5 class="mt-3">Dataset Selection</h5>
 
-          <h6 class="mt-3">Available matrices:</h6>
+          <h6 class="mt-3">Available datasets:</h6>
           <div>
             <b-form-select v-model="selected" :options="options"></b-form-select>
             <b-card v-if="selected" no-body class="mt-3">

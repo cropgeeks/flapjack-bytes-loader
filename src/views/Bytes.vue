@@ -9,7 +9,25 @@
     <div class="d-flex justify-content-center h-100 align-items-cente" v-if="showSpinner">
       <p>{{ message }}</p>
     </div>
+    <b-row>
+      <b-col md="2"></b-col>
+      <b-col md="8">
+        <b-alert
+          variant="danger"
+          dismissible
+          fade
+          :show="showDismissibleAlert"
+          @dismissed="showDismissibleAlert=false"
+        >No calls appear to be available for this VariantSet</b-alert>
+      </b-col>
+    </b-row>
     <div id="bytes-div" ref="bytes"></div>
+    <b-row>
+      <b-col md="2"></b-col>
+      <b-col md="8">
+        <b-button variant="secondary" class="mt-3" @click="backToMatrix">Back to VariantSet selection</b-button>
+      </b-col>
+    </b-row>
   </div>
 </template>
 
@@ -21,7 +39,8 @@ export default {
   data() {
     return {
       showSpinner: true,
-      message: "Loading..."
+      message: "Loading...",
+      showDismissibleAlert: false
     };
   },
 
@@ -56,7 +75,7 @@ export default {
       "FlapjackError",
       function(e) {
         vm.showSpinner = false;
-        alert("An unexpected error occured");
+        vm.showAlert();
         var elem = document.querySelector('#zoom-holder');
         elem.parentNode.removeChild(elem);
       }
@@ -72,6 +91,16 @@ export default {
       this.mapId,
       this.authToken
     );
+  },
+
+  methods: {
+    showAlert() {
+      this.showDismissibleAlert = true;
+    },
+    
+    backToMatrix: function() {
+      this.$router.push({ name: "matrix" });
+    }
   }
 };
 </script>
