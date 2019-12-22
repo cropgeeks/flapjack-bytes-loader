@@ -3440,7 +3440,6 @@
 
       processVariantSetCall(client, '/variantsets/' + matrixId + '/calls').then(function () {
         var genotypeImporter = new GenotypeImporter(genomeMap);
-        console.log(variantsets);
 
         if (genomeMap === undefined) {
           genomeMap = genotypeImporter.createFakeMapFromVariantSets(variantsets);
@@ -3448,7 +3447,6 @@
 
         germplasmData = genotypeImporter.parseVariantSetCalls(variantsets);
         var stateTable = genotypeImporter.stateTable;
-        console.log(stateTable);
         colorScheme = new NucleotideColorScheme(stateTable, document);
         dataSet = new DataSet(genomeMap, germplasmData);
         genotypeCanvas.init(dataSet, colorScheme);
@@ -3574,10 +3572,10 @@
     function processVariantSetCall(client, url, params) {
       return client.get(url, params).then(function (response) {
         var nextPageToken = response.data.metadata.pagination.nextPageToken;
+        var newData = response.data.result.data;
+        variantsets.push.apply(variantsets, _toConsumableArray(newData));
 
         if (nextPageToken) {
-          var newData = response.data.result.data;
-          variantsets.push.apply(variantsets, _toConsumableArray(newData));
           var newParams = {
             params: {
               pageToken: nextPageToken
