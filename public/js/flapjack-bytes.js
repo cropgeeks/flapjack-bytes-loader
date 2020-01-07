@@ -1479,6 +1479,16 @@
         this.widgetX = newX;
         this.widgetY = newY;
       }
+    }, {
+      key: "resizeWidth",
+      value: function resizeWidth(newWidth) {
+        this.width = newWidth > 20 ? newWidth : 20;
+      }
+    }, {
+      key: "resizeHeight",
+      value: function resizeHeight(newHeight) {
+        this.height = newHeight > 20 ? newHeight : 20;
+      }
     }]);
 
     return ScrollBarWidget;
@@ -1520,6 +1530,20 @@
       value: function updateWidth(newWidth) {
         if (!this.vertical) {
           this.width = newWidth;
+        }
+      }
+    }, {
+      key: "resizeWidgetWidth",
+      value: function resizeWidgetWidth(newWidth) {
+        if (!this.vertical) {
+          this.widget.resizeWidth(newWidth);
+        }
+      }
+    }, {
+      key: "resizeWidgetHeight",
+      value: function resizeWidgetHeight(newHeight) {
+        if (this.vertical) {
+          this.widget.resizeHeight(newHeight);
         }
       }
     }]);
@@ -1577,7 +1601,7 @@
     }, {
       key: "maxCanvasHeight",
       value: function maxCanvasHeight() {
-        return Math.max(this.dataSet.lineCount() * this.boxSize, this.canvas.height);
+        return Math.max(this.dataSet.lineCount() * this.boxSize, this.alleleCanvasHeight());
       }
     }, {
       key: "alleleCanvasWidth",
@@ -1598,6 +1622,7 @@
         this.updateVisualPositions();
         this.colorScheme.setupColorStamps(this.boxSize, this.font, this.fontSize);
         this.colorStamps = this.colorScheme.colorStamps;
+        this.zoom(this.boxSize);
       }
     }, {
       key: "prerender",
@@ -1776,18 +1801,30 @@
       key: "renderScrollbars",
       value: function renderScrollbars() {
         this.backContext.save();
-        this.backContext.translate(0, this.mapCanvasHeight);
-        this.verticalScrollbar.render(this.backContext);
+
+        if (this.canScrollY()) {
+          this.backContext.translate(0, this.mapCanvasHeight);
+          this.verticalScrollbar.render(this.backContext);
+        }
+
         this.backContext.restore();
         this.backContext.save();
-        this.backContext.translate(this.nameCanvasWidth, 0);
-        this.horizontalScrollbar.render(this.backContext);
+
+        if (this.canScrollX()) {
+          this.backContext.translate(this.nameCanvasWidth, 0);
+          this.horizontalScrollbar.render(this.backContext);
+        }
+
         this.backContext.restore();
         this.backContext.save();
-        this.backContext.translate(this.nameCanvasWidth, this.mapCanvasHeight);
-        this.backContext.fillStyle = '#aaa';
-        this.backContext.strokeRect(this.alleleCanvasWidth(), this.alleleCanvasHeight(), this.scrollbarWidth, this.scrollbarHeight);
-        this.backContext.fillRect(this.alleleCanvasWidth(), this.alleleCanvasHeight(), this.scrollbarWidth, this.scrollbarHeight);
+
+        if (this.canScrollX() || this.canScrollY()) {
+          this.backContext.translate(this.nameCanvasWidth, this.mapCanvasHeight);
+          this.backContext.fillStyle = '#aaa';
+          this.backContext.strokeRect(this.alleleCanvasWidth(), this.alleleCanvasHeight(), this.scrollbarWidth, this.scrollbarHeight);
+          this.backContext.fillRect(this.alleleCanvasWidth(), this.alleleCanvasHeight(), this.scrollbarWidth, this.scrollbarHeight);
+        }
+
         this.backContext.restore();
       }
     }, {
@@ -1821,7 +1858,7 @@
             this.translatedX = xScrollMax;
           }
 
-          var scrollWidth = this.alleleCanvasWidth() - 20;
+          var scrollWidth = this.alleleCanvasWidth() - this.horizontalScrollbar.widget.width;
           var scrollX = Math.floor(this.mapToRange(this.translatedX, 0, xScrollMax, 0, scrollWidth));
           this.horizontalScrollbar.move(scrollX, this.horizontalScrollbar.y);
         }
@@ -1840,10 +1877,52 @@
             this.translatedY = yScrollMax;
           }
 
-          var scrollHeight = this.alleleCanvasHeight() - 20;
+          var scrollHeight = this.alleleCanvasHeight() - this.verticalScrollbar.widget.height;
           var scrollY = Math.floor(this.mapToRange(this.translatedY, 0, yScrollMax, 0, scrollHeight));
           this.verticalScrollbar.move(this.verticalScrollbar.x, scrollY);
         }
+      }
+    }, {
+      key: "dragVerticalScrollbar",
+      value: function dragVerticalScrollbar(y) {
+        if (this.canScrollY()) {
+          var yScrollMax = this.maxCanvasHeight() - this.alleleCanvasHeight();
+          this.translatedY = y / this.verticalScrollbar.height * yScrollMax; // Prevent scrolling beyond start or end of data
+
+          if (this.translatedY < 0) {
+            this.translatedY = 0;
+          } else if (this.translatedY >= yScrollMax) {
+            this.translatedY = yScrollMax;
+          }
+
+          var scrollHeight = this.alleleCanvasHeight() - this.verticalScrollbar.widget.height;
+          var scrollY = Math.floor(this.mapToRange(this.translatedY, 0, yScrollMax, 0, scrollHeight));
+          this.verticalScrollbar.move(this.verticalScrollbar.x, scrollY);
+        }
+
+        this.redraw = true;
+        this.prerender();
+      }
+    }, {
+      key: "dragHorizontalScrollbar",
+      value: function dragHorizontalScrollbar(x) {
+        if (this.canScrollX()) {
+          var xScrollMax = this.maxCanvasWidth() - this.alleleCanvasWidth();
+          this.translatedX = x / this.horizontalScrollbar.width * xScrollMax; // Prevent scrolling beyond start or end of data
+
+          if (this.translatedX < 0) {
+            this.translatedX = 0;
+          } else if (this.translatedX >= xScrollMax) {
+            this.translatedX = xScrollMax;
+          }
+
+          var scrollWidth = this.alleleCanvasWidth() - this.horizontalScrollbar.widget.width;
+          var scrollX = Math.floor(this.mapToRange(this.translatedX, 0, xScrollMax, 0, scrollWidth));
+          this.horizontalScrollbar.move(scrollX, this.horizontalScrollbar.y);
+        }
+
+        this.redraw = true;
+        this.prerender();
       }
     }, {
       key: "move",
@@ -1917,13 +1996,24 @@
         });
       }
     }, {
+      key: "updateScrollBarSizes",
+      value: function updateScrollBarSizes() {
+        var screenWidthPerc = this.alleleCanvasWidth() / this.maxCanvasWidth();
+        var hScrollWidgetWidth = Math.ceil(this.alleleCanvasWidth() * screenWidthPerc);
+        this.horizontalScrollbar.resizeWidgetWidth(hScrollWidgetWidth);
+        var screenHeightPerc = this.alleleCanvasHeight() / this.maxCanvasHeight();
+        var vScrollWidgetHeight = Math.ceil(this.alleleCanvasHeight() * screenHeightPerc);
+        this.verticalScrollbar.resizeWidgetHeight(vScrollWidgetHeight);
+      }
+    }, {
       key: "zoom",
       value: function zoom(size) {
         this.boxSize = size;
         this.updateFontSize();
         this.colorScheme.setupColorStamps(this.boxSize, this.font, this.fontSize);
         this.updateCanvasWidths();
-        this.updateVisualPositions(); // If zooming out means the genotypes don't take up the full canvas, return
+        this.updateVisualPositions();
+        this.updateScrollBarSizes(); // If zooming out means the genotypes don't take up the full canvas, return
         // the display to its horizontal origin
 
         if (!this.canScrollX()) {
@@ -1966,45 +2056,128 @@
     return GenotypeCanvas;
   }();
 
-  var CanvasController = function CanvasController(genotypeCanvas) {
-    var _this = this;
+  var CanvasController =
+  /*#__PURE__*/
+  function () {
+    function CanvasController(genotypeCanvas) {
+      var _this = this;
 
-    _classCallCheck(this, CanvasController);
+      _classCallCheck(this, CanvasController);
 
-    this.genotypeCanvas = genotypeCanvas;
-    this.dragStartX = null;
-    this.dragStartY = null;
-    this.dragging = false;
-    this.genotypeCanvas.canvas.addEventListener('mousedown', function (e) {
-      _this.dragStartX = e.pageX;
-      _this.dragStartY = e.pageY;
-      _this.dragging = true;
-    });
-    this.genotypeCanvas.canvas.addEventListener('mousemove', function (e) {
-      var rect = _this.genotypeCanvas.canvas.getBoundingClientRect();
+      this.genotypeCanvas = genotypeCanvas;
+      this.dragStartX = null;
+      this.dragStartY = null;
+      this.draggingCanvas = false;
+      this.draggingVerticalScrollbar = false;
+      this.draggingHorizontalScrollbar = false;
+      this.genotypeCanvas.canvas.addEventListener('mousedown', function (e) {
+        // The following block of code is used to determine if we are scrolling
+        // using the scrollbar widget, rather than grabbing the canvas
+        var rect = _this.genotypeCanvas.canvas.getBoundingClientRect();
 
-      var x = (e.clientX - rect.left) / (rect.right - rect.left) * _this.genotypeCanvas.backBuffer.width;
-      var y = (e.clientY - rect.top) / (rect.bottom - rect.top) * _this.genotypeCanvas.backBuffer.height;
+        var x = (e.clientX - rect.left) / (rect.right - rect.left) * _this.genotypeCanvas.backBuffer.width;
+        var y = (e.clientY - rect.top) / (rect.bottom - rect.top) * _this.genotypeCanvas.backBuffer.height;
+        var _this$genotypeCanvas = _this.genotypeCanvas,
+            verticalScrollbar = _this$genotypeCanvas.verticalScrollbar,
+            horizontalScrollbar = _this$genotypeCanvas.horizontalScrollbar;
 
-      _this.genotypeCanvas.mouseOver(x, y);
-    });
-    this.genotypeCanvas.canvas.addEventListener('mouseleave', function () {
-      _this.genotypeCanvas.mouseOver(undefined, undefined);
-    });
-    window.addEventListener('mouseup', function () {
-      _this.dragging = false;
-    });
-    window.addEventListener('mousemove', function (e) {
-      if (_this.dragging) {
-        var diffX = e.pageX - _this.dragStartX;
-        var diffY = e.pageY - _this.dragStartY;
-        _this.dragStartX = e.pageX;
-        _this.dragStartY = e.pageY;
+        if (_this.isOverVerticalScrollbar(x, verticalScrollbar)) {
+          // Flag to remember that the scrollbar widget was initially clicked on
+          // which prevents mouse drift prematurely stopping scrolling from happening
+          _this.draggingVerticalScrollbar = true;
 
-        _this.genotypeCanvas.move(diffX, diffY);
+          _this.dragVerticalScrollbar(e.clientY);
+        } else if (_this.isOverHorizontalScrollbar(y, horizontalScrollbar)) {
+          // Flag to remember that the scrollbar widget was initially clicked on
+          // which prevents mouse drift prematurely stopping scrolling from happening
+          _this.draggingHorizontalScrollbar = true;
+
+          _this.dragHorizontalScrollbar(e.clientX);
+        } else {
+          // We are scrolling by grabbing the canvas directly
+          _this.dragStartX = e.pageX;
+          _this.dragStartY = e.pageY;
+          _this.draggingCanvas = true;
+        }
+      });
+      this.genotypeCanvas.canvas.addEventListener('mousemove', function (e) {
+        var rect = _this.genotypeCanvas.canvas.getBoundingClientRect();
+
+        var x = (e.clientX - rect.left) / (rect.right - rect.left) * _this.genotypeCanvas.backBuffer.width;
+        var y = (e.clientY - rect.top) / (rect.bottom - rect.top) * _this.genotypeCanvas.backBuffer.height;
+
+        _this.genotypeCanvas.mouseOver(x, y);
+      });
+      this.genotypeCanvas.canvas.addEventListener('mouseleave', function () {
+        _this.genotypeCanvas.mouseOver(undefined, undefined);
+      });
+      window.addEventListener('mouseup', function () {
+        _this.draggingCanvas = false;
+        _this.draggingVerticalScrollbar = false;
+        _this.draggingHorizontalScrollbar = false;
+      });
+      window.addEventListener('mousemove', function (e) {
+        if (_this.draggingVerticalScrollbar) {
+          _this.dragVerticalScrollbar(e.clientY);
+        } else if (_this.draggingHorizontalScrollbar) {
+          _this.dragHorizontalScrollbar(e.clientX);
+        } else if (_this.draggingCanvas) {
+          _this.dragCanvas(e.pageX, e.pageY);
+        }
+      });
+    }
+
+    _createClass(CanvasController, [{
+      key: "isOverVerticalScrollbar",
+      value: function isOverVerticalScrollbar(x, verticalScrollbar) {
+        return x >= verticalScrollbar.x && x <= verticalScrollbar.x + verticalScrollbar.widget.width;
       }
-    });
-  };
+    }, {
+      key: "isOverHorizontalScrollbar",
+      value: function isOverHorizontalScrollbar(y, horizontalScrollbar) {
+        return y >= horizontalScrollbar.y && y <= horizontalScrollbar.y + horizontalScrollbar.widget.height;
+      }
+    }, {
+      key: "dragVerticalScrollbar",
+      value: function dragVerticalScrollbar(clientY) {
+        // Grab various variables which allow us to calculate the y coordinate
+        // relative to the allele canvas
+        var rect = this.genotypeCanvas.canvas.getBoundingClientRect();
+        var alleleCanvasHeight = this.genotypeCanvas.alleleCanvasHeight();
+        var mapCanvasHeight = this.genotypeCanvas.mapCanvasHeight;
+        var rectTop = rect.top + mapCanvasHeight; // Calculate the y coordinate of the mouse on the allele canvas
+
+        var y = (clientY - rectTop) / (rect.bottom - rectTop) * alleleCanvasHeight; // Move the vertical scrollbar to coorodinate y
+
+        this.genotypeCanvas.dragVerticalScrollbar(y);
+      }
+    }, {
+      key: "dragHorizontalScrollbar",
+      value: function dragHorizontalScrollbar(clientX) {
+        // Grab various variables which allow us to calculate the x coordinate
+        // relative to the allele canvas
+        var rect = this.genotypeCanvas.canvas.getBoundingClientRect();
+        var alleleCanvasWidth = this.genotypeCanvas.alleleCanvasWidth();
+        var nameCanvasWidth = this.genotypeCanvas.nameCanvasWidth;
+        var rectLeft = rect.left + nameCanvasWidth; // Calculate the x coordinate of the mouse on the allele canvas
+
+        var x = (clientX - rectLeft) / (rect.right - rectLeft) * alleleCanvasWidth; // Move the vertical scrollbar to coorodinate x
+
+        this.genotypeCanvas.dragHorizontalScrollbar(x);
+      }
+    }, {
+      key: "dragCanvas",
+      value: function dragCanvas(x, y) {
+        var diffX = x - this.dragStartX;
+        var diffY = y - this.dragStartY;
+        this.dragStartX = x;
+        this.dragStartY = y;
+        this.genotypeCanvas.move(diffX, diffY);
+      }
+    }]);
+
+    return CanvasController;
+  }();
 
   var Genotype =
   /*#__PURE__*/

@@ -7,12 +7,12 @@
       <b-container class="bv-example-row" mt="2">
         <b-row>
           <b-col></b-col>
-          <b-col cols="8"></b-col>
+          <b-col cols="10"></b-col>
           <b-col></b-col>
         </b-row>
         <b-row>
           <b-col></b-col>
-          <b-col cols="8">
+          <b-col cols="10">
             <div id="app">
               <transition-page>
                 <router-view :key="$route.path" />
