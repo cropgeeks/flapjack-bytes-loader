@@ -16,31 +16,27 @@
             </b-col>
           </b-row>
           <b-row>
-            <b-col md="2"></b-col>
-            <b-col md="2">
-              <label for="username">Username:</label>
+            <b-col md="3">
             </b-col>
             <b-col md="6">
-              <b-form-input id="username" v-model="username" type="text"></b-form-input>
+              <b-form>
+                <h4>Login</h4>
+                <b-form-row>
+                    <b-form-input id="username" v-model="username" type="text" placeholder="Username"></b-form-input>
+                </b-form-row>
+                <b-form-row class="mt-3">
+                    <b-form-input id="password" v-model="password" type="password" placeholder="Password"></b-form-input>
+                </b-form-row>
+
+                
+                <b-form-row class="mt-3">
+                  <b-button variant="primary" @click="loginClicked">Login</b-button>
+                </b-form-row>
+              </b-form>
+            </b-col>
+            <b-col md="3">
             </b-col>
           </b-row>
-          <b-row>
-            <b-col md="2"></b-col>
-            <b-col md="2">
-              <label for="password">Password:</label>
-            </b-col>
-            <b-col md="6">
-              <b-form-input id="password" v-model="password" type="password"></b-form-input>
-            </b-col>
-          </b-row>
-
-          <div v-if="unsuccessfulLogin" class="d-flex justify-content-center mb-3 mt-3">
-            <b-button variant="primary" @click="loginClicked">Login</b-button>
-          </div>
-
-          <div v-else class="d-flex justify-content-center mb-3 mt-3">
-            <b-spinner label="Loading..." variant="primary"></b-spinner>
-          </div>
         </div>
       </div>
     </div>
@@ -58,7 +54,6 @@ export default {
       username: "",
       password: "",
       instance: null,
-      unsuccessfulLogin: true,
       showDismissibleAlert: false
     };
   },
@@ -89,7 +84,6 @@ export default {
             );
 
             if (response.data.access_token) {
-              this.unsuccessfulLogin = false;
               this.$router.push({ name: "matrix" });
             }
           }.bind(this)
