@@ -1614,6 +1614,20 @@
         return this.canvas.height - this.mapCanvasHeight - this.scrollbarHeight;
       }
     }, {
+      key: "prevChromosomeStart",
+      value: function prevChromosomeStart() {
+        var _this = this;
+
+        var chromStart = 0;
+        var tempX = this.translatedX - this.nameCanvasWidth;
+        this.chromosomeStarts.forEach(function (start, index) {
+          if (tempX >= start && tempX < _this.chromosomeEnds[index] || index > 0 && tempX >= _this.chromosomeEnds[index - 1] && tempX <= _this.chromosomeStarts[index]) {
+            chromStart = index * _this.chromosomeGapSize;
+          }
+        });
+        return chromStart;
+      }
+    }, {
       key: "init",
       value: function init(dataSet, colorScheme) {
         this.dataSet = dataSet;
@@ -1627,20 +1641,13 @@
     }, {
       key: "prerender",
       value: function prerender() {
-        var _this = this;
-
         this.drawingContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         if (this.redraw) {
           var dataWidth = Math.ceil(this.alleleCanvasWidth() / this.boxSize); // We need to calculate an offset because the gaps between chromosomes
           // aren't part of the data model
 
-          var offset = 0;
-          this.chromosomeStarts.forEach(function (start, index) {
-            if (_this.translatedX >= start && _this.translatedX < _this.chromosomeEnds[index] || index > 0 && _this.translatedX >= _this.chromosomeEnds[index - 1] && _this.translatedX <= _this.chromosomeStarts[index]) {
-              offset = index * _this.chromosomeGapSize;
-            }
-          });
+          var offset = this.prevChromosomeStart();
           var markerStart = Math.floor((this.translatedX - offset) / this.boxSize);
           var markerEnd = Math.min(markerStart + dataWidth, this.dataSet.markerCount());
           var germplasmStart = Math.floor(this.translatedY / this.boxSize);
@@ -1935,15 +1942,20 @@
     }, {
       key: "mouseOver",
       value: function mouseOver(x, y) {
-        if (x >= this.nameCanvasWidth && x < this.backBuffer.width && y >= this.mapCanvasHeight && y < this.backBuffer.height) {
-          this.markerUnderMouse = Math.floor((x - this.nameCanvasWidth) / this.boxSize);
-          this.lineUnderMouse = Math.floor((y - this.mapCanvasHeight) / this.boxSize);
-        } else {
-          this.lineUnderMouse = undefined;
-          this.markerUnderMouse = undefined;
-        }
-
-        this.prerender();
+        // We need to calculate an offset because the gaps between chromosomes
+        // aren't part of the data model
+        var offset = this.prevChromosomeStart();
+        var markerIndex = Math.floor((x - offset - this.nameCanvasWidth) / this.boxSize);
+        var markerUnderMouse = this.dataSet.markerAt(markerIndex); // console.log(this.dataSet.genomeMap.chromosomeAndMarkerFor(markerIndex));
+        // console.log(this.dataSet.genomeMap.chromosomes[markerUnderMouse[0].chromosomeIndex].markers[markerUnderMouse[0].firstMarker].name);
+        // if (x >= this.nameCanvasWidth && x < this.backBuffer.width && y >= this.mapCanvasHeight && y < this.backBuffer.height) {
+        //   this.markerUnderMouse = Math.floor((x - this.nameCanvasWidth) / this.boxSize);
+        //   this.lineUnderMouse = Math.floor((y - this.mapCanvasHeight) / this.boxSize);
+        // } else {
+        //   this.lineUnderMouse = undefined;
+        //   this.markerUnderMouse = undefined;
+        // }
+        // this.prerender();
       }
     }, {
       key: "updateFontSize",
@@ -3079,6 +3091,13 @@
         return positions;
       }
     }, {
+      key: "chromosomeAndMarkerFor",
+      value: function chromosomeAndMarkerFor(dataIndex) {
+        var foundChromosomes = this.intervalTree.search(dataIndex, dataIndex);
+        var chromosome = this.chromosomes.indexOf(foundChromosomes[0]);
+        var chromStart = this.chromosomeStarts.get(chromosome);
+      }
+    }, {
       key: "markerByName",
       value: function markerByName(markerName) {
         var found = -1;
@@ -3299,18 +3318,17 @@
       value: function parseVariantSetCalls(variantSetsCalls) {
         var _this3 = this;
 
-        var genoNames = _toConsumableArray(new Set(variantSetsCalls.map(function (v) {
-          return v.callSetName;
-        })));
-
+        var genoNames = new Set(variantSetsCalls.map(function (v) {
+          return v.lineName;
+        }));
         genoNames.forEach(function (name) {
           var genoCalls = variantSetsCalls.filter(function (v) {
-            return v.callSetName === name;
+            return v.lineName === name;
           });
 
           if (_this3.markerIndices.size === 0) {
             genoCalls.forEach(function (call, idx) {
-              var indices = _this3.genomeMap.markerByName(call.variantName);
+              var indices = _this3.genomeMap.markerByName(call.markerName);
 
               if (indices !== -1) {
                 _this3.markerIndices.set(idx, indices);
@@ -3321,11 +3339,10 @@
           var genotypeData = _this3.initGenotypeData();
 
           genoCalls.forEach(function (call, idx) {
-            var indices = _this3.markerIndices.get(idx); // console.log(indices);
-
+            var indices = _this3.markerIndices.get(idx);
 
             if (indices !== undefined && indices !== -1) {
-              genotypeData[indices.chromosome][indices.markerIndex] = _this3.getState(call.genotype.values[0]);
+              genotypeData[indices.chromosome][indices.markerIndex] = _this3.getState(call.allele);
             }
           });
           var germplasm = new Germplasm(name, genotypeData);
@@ -3543,6 +3560,31 @@
 
         var map = this.createMap();
         return map;
+      } // A method which converts BrAPI markerpositions into Flapjack markers for
+      // rendering
+
+    }, {
+      key: "parseMarkerpositions",
+      value: function parseMarkerpositions(markerpositions) {
+        var _this2 = this;
+
+        markerpositions.forEach(function (marker) {
+          _this2.processBrapiMarkerposition(marker);
+        });
+        var map = this.createMap();
+        return map;
+      }
+    }, {
+      key: "processBrapiMarkerposition",
+      value: function processBrapiMarkerposition(markerposition) {
+        var name = markerposition.name,
+            chromosome = markerposition.chromosome,
+            position = markerposition.position; // Keep track of the chromosomes that we've found
+
+        this.chromosomeNames.add(chromosome); // Create a marker object and add it to our array of markers
+
+        var marker = new Marker(name, chromosome, parseInt(position.replace(/,/g, ''), 10));
+        this.markerData.push(marker);
       }
     }]);
 
@@ -3575,6 +3617,11 @@
         return this.genomeMap.chromosomePositionsFor(markerStart, markerEnd);
       }
     }, {
+      key: "markerAt",
+      value: function markerAt(markerIndex) {
+        return this.genomeMap.chromosomePositionsFor(markerIndex, markerIndex);
+      }
+    }, {
       key: "markerCount",
       value: function markerCount() {
         return this.genomeMap.markerCount();
@@ -3598,7 +3645,6 @@
     var colorScheme;
     var genomeMap;
     var dataSet;
-    var variantsets = [];
 
     genotypeRenderer.renderGenotypesBrapi = function (domParent, width, height, server, matrixId, mapId, authToken) {
       createRendererComponents(domParent, width, height);
@@ -3606,29 +3652,40 @@
       var client = axios$1.create({
         baseURL: server
       });
-      client.defaults.headers.common['Authorization'] = 'Bearer ' + authToken; // TODO: GOBii don't have the markerpositions call implemented yet so I 
-      // can't load map data
-      // This will recursively call the given variant set until it has consumed
-      // all pages of data for the variant set
-
-      processVariantSetCall(client, '/variantsets/' + matrixId + '/calls').then(function () {
-        var genotypeImporter = new GenotypeImporter(genomeMap);
-
-        if (genomeMap === undefined) {
-          genomeMap = genotypeImporter.createFakeMapFromVariantSets(variantsets);
+      client.defaults.headers.common['Authorization'] = 'Bearer ' + authToken;
+      var newParams = {
+        params: {
+          pageToken: '95'
         }
+      }; // TODO: GOBii don't have the markerpositions call implemented yet so I 
+      // can't load map data
 
-        germplasmData = genotypeImporter.parseVariantSetCalls(variantsets);
-        var stateTable = genotypeImporter.stateTable;
-        colorScheme = new NucleotideColorScheme(stateTable, document);
-        dataSet = new DataSet(genomeMap, germplasmData);
-        genotypeCanvas.init(dataSet, colorScheme);
-        genotypeCanvas.prerender(); // Tells the dom parent that Flapjack has finished loading. Allows spinners
-        // or similar to be disabled
+      processMarkerPositionsCall(client, '/markerpositions?mapDbId=' + mapId).then(function (markerpositions) {
+        var mapImporter = new MapImporter();
+        genomeMap = mapImporter.parseMarkerpositions(markerpositions);
+        processVariantSetCall(client, '/variantsets/' + matrixId + '/calls?pageSize=100000', newParams).then(function (variantSetCalls) {
+          var genotypeImporter = new GenotypeImporter(genomeMap);
 
-        sendEvent("FlapjackFinished", domParent);
+          if (genomeMap === undefined) {
+            genomeMap = genotypeImporter.createFakeMapFromVariantSets(variantSetCalls);
+          }
+
+          germplasmData = genotypeImporter.parseVariantSetCalls(variantSetCalls);
+          var stateTable = genotypeImporter.stateTable;
+          colorScheme = new NucleotideColorScheme(stateTable, document);
+          dataSet = new DataSet(genomeMap, germplasmData);
+          genotypeCanvas.init(dataSet, colorScheme);
+          genotypeCanvas.prerender(); // Tells the dom parent that Flapjack has finished loading. Allows spinners
+          // or similar to be disabled
+
+          sendEvent("FlapjackFinished", domParent);
+        })["catch"](function (error) {
+          sendEvent("FlapjackError", domParent);
+          console.log(error);
+        });
       })["catch"](function (error) {
         sendEvent("FlapjackError", domParent);
+        console.log(error);
       });
       return genotypeRenderer;
     };
@@ -3742,11 +3799,50 @@
       return genotypeRenderer;
     };
 
+    function processMarkerPositionsCall(client, url, params) {
+      var markerpositions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
+      return client.get(url, params).then(function (response) {
+        var _response$data$metada = response.data.metadata.pagination,
+            currentPage = _response$data$metada.currentPage,
+            totalPages = _response$data$metada.totalPages;
+        var newData = response.data.result.data;
+        markerpositions.push.apply(markerpositions, _toConsumableArray(newData.map(function (m) {
+          return {
+            name: m.markerName,
+            chromosome: m.linkageGroupName,
+            position: m.position
+          };
+        })));
+
+        if (currentPage < totalPages - 1) {
+          var nextPage = currentPage + 1;
+          var newParams = {
+            params: {
+              page: nextPage
+            }
+          };
+          return processMarkerPositionsCall(client, url, newParams, markerpositions);
+        }
+
+        return markerpositions;
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    }
+
     function processVariantSetCall(client, url, params) {
+      var variantSetCalls = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
       return client.get(url, params).then(function (response) {
         var nextPageToken = response.data.metadata.pagination.nextPageToken;
+        console.log(nextPageToken);
         var newData = response.data.result.data;
-        variantsets.push.apply(variantsets, _toConsumableArray(newData));
+        variantSetCalls.push.apply(variantSetCalls, _toConsumableArray(newData.map(function (calls) {
+          return {
+            lineName: calls.callSetName,
+            markerName: calls.variantName,
+            allele: calls.genotype.values[0]
+          };
+        })));
 
         if (nextPageToken) {
           var newParams = {
@@ -3754,10 +3850,12 @@
               pageToken: nextPageToken
             }
           };
-          return processVariantSetCall(client, url, newParams);
+          return processVariantSetCall(client, url, newParams, variantSetCalls);
         }
 
-        return;
+        return variantSetCalls;
+      })["catch"](function (error) {
+        console.log(error);
       });
     }
 

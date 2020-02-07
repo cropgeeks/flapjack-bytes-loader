@@ -18,7 +18,7 @@
             </b-card>
 
             <div class="d-flex justify-content-center mb-3 mt-1">
-              <b-button variant="primary" class="mt-3" @click="viewMatrix">View</b-button>
+              <b-button variant="primary" class="mt-3" @click="navigateToNextPage">Select</b-button>
             </div>
           </div>
         </div>
@@ -68,18 +68,19 @@ export default {
   },
 
   methods: {
-    // navigateToNextPage() {
-    //   this.$router.push({ name: "bytes" });
-    // },
+    navigateToNextPage() {
+      this.$store.dispatch("ON_MATRIX_ID_CHANGED", this.selected.variantSetDbId);
+      this.$router.push({ name: "map" });
+    },
 
     addOption: function(option) {
       this.options.push({ text: option.variantSetName, value: option });
     },
 
-    viewMatrix: function() {
-      this.$store.dispatch("ON_MATRIX_ID_CHANGED", this.selected.variantSetDbId);
-      this.$router.push({ name: "bytes" });
-    }
+    // viewMatrix: function() {
+    //   this.$store.dispatch("ON_MATRIX_ID_CHANGED", this.selected.variantSetDbId);
+    //   this.$router.push({ name: "map" });
+    // }
   }
 };
 </script>

@@ -3,7 +3,7 @@
     <h5 class="mt-3">Map Selection</h5>
 
     <h6 class="mt-3">Available maps:</h6>
-    <b-form-select v-model="selectedMap" :options="options" :select-size="4" size="sm" class="mt-3"></b-form-select>
+    <b-form-select v-model="selectedMap" :options="options"></b-form-select>
     <div></div>
 
     <div v-if="selectedMap">
@@ -25,7 +25,7 @@
         size="sm"
         variant="primary"
         @click="navigateToNextPage"
-      >Continue</b-button>
+      >Select</b-button>
     </div>
   </div>
 </template>
@@ -62,7 +62,6 @@ export default {
     }).then(response => {
       const resp = response.data
       resp.result.data.forEach(map => {
-        console.log(map)
         vm.addOption(map)
       })
     })
@@ -74,9 +73,9 @@ export default {
     },
 
     navigateToNextPage() {
-      this.$store.dispatch("ON_MAP_ID_CHANGED", this.selectedMap.id);
+      this.$store.dispatch("ON_MAP_ID_CHANGED", this.selectedMap.mapDbId);
       //move on to matrix. It always comes after maps.
-      this.$router.push({ name: "matrix" });
+      this.$router.push({ name: "bytes" });
     }
   }
 };
