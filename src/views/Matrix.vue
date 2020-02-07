@@ -18,7 +18,7 @@
             </b-card>
 
             <div class="d-flex justify-content-center mb-3 mt-1">
-              <b-button variant="primary" class="mt-3" @click="navigateToNextPage">Select</b-button>
+              <b-button variant="primary" class="mt-3" @click="navigateToNextPage" :disabled="selected === null">Select</b-button>
             </div>
           </div>
         </div>
@@ -46,7 +46,7 @@ export default {
       "authToken",
       "selectedOptions",
       "selectedStudyId"
-    ])
+    ]),
   },
 
   mounted: function() {
@@ -65,6 +65,8 @@ export default {
         vm.addOption(matrix)
       })
     })
+
+    console.log(this.selected);
   },
 
   methods: {
