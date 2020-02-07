@@ -28,9 +28,8 @@
                     <b-form-input id="password" v-model="password" type="password" placeholder="Password"></b-form-input>
                 </b-form-row>
 
-                
                 <b-form-row class="mt-3">
-                  <b-button variant="primary" @click="loginClicked">Login</b-button>
+                  <b-button variant="primary" @click="loginClicked" class="ml-auto">Login</b-button>
                 </b-form-row>
               </b-form>
             </b-col>

@@ -17,9 +17,11 @@
               </b-card-body>
             </b-card>
 
-            <div class="d-flex justify-content-center mb-3 mt-1">
-              <b-button variant="primary" class="mt-3" @click="navigateToNextPage" :disabled="selected === null">Select</b-button>
-            </div>
+            <b-form-group class="text-right">
+              <div class="mt-1">
+                <b-button variant="primary" class="mt-3" @click="navigateToNextPage" :disabled="selected === null">Select</b-button>
+              </div>
+            </b-form-group>
           </div>
         </div>
       </div>

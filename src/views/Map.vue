@@ -21,7 +21,7 @@
               </b-card-body>
             </b-card>
           </div>
-          <div class="d-flex justify-content-center mb-3 mt-1">
+          <b-form-group class="text-right">
             <b-button id="skipBtn" variant="secondary" class="mt-3 mr-3" @click="navigateToNextPage">Skip</b-button>
             <b-button
               id="continueBtn"
@@ -30,7 +30,7 @@
               class="mt-3"
               @click="selectAndNavigateToNextPage"
             >Select</b-button>
-          </div>
+          </b-form-group>
         </div>
       </div>
     </div>
