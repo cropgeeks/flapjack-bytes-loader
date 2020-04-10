@@ -99,6 +99,8 @@ export default {
     },
     
     backToMatrix: function() {
+      this.$store.dispatch("ON_MATRIX_ID_CHANGED", null);
+      this.$store.dispatch("ON_MAP_ID_CHANGED", null);
       this.$router.push({ name: "matrix" });
     }
   }

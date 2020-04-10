@@ -1440,14 +1440,6 @@
 
   var axios$1 = axios_1;
 
-  var Marker = function Marker(name, chromosome, position) {
-    _classCallCheck(this, Marker);
-
-    this.name = name;
-    this.chromosome = chromosome;
-    this.position = position;
-  };
-
   var ScrollBarWidget =
   /*#__PURE__*/
   function () {
@@ -1551,6 +1543,384 @@
     return ScrollBar;
   }();
 
+  var NucleotideColorScheme =
+  /*#__PURE__*/
+  function () {
+    function NucleotideColorScheme(dataSet) {
+      _classCallCheck(this, NucleotideColorScheme);
+
+      this.dataSet = dataSet;
+      this.stateTable = this.dataSet.stateTable;
+      this.colors = {
+        greenLight: 'rgb(171,255,171)',
+        greenDark: 'rgb(86,179,86)',
+        redLight: 'rgb(255,171,171)',
+        redDark: 'rgb(179,86,86)',
+        blueLight: 'rgb(171,171,255)',
+        blueDark: 'rgb(86,86,179)',
+        orangeLight: 'rgb(255,228,171)',
+        orangeDark: 'rgb(179,114,86)',
+        white: 'rgb(255,255,255)',
+        greyLight: 'rgb(210,210,210)',
+        greyDark: 'rgb(192,192,192)'
+      };
+      this.colorMap = new Map();
+      this.colorMap.set('A', {
+        light: this.colors.greenLight,
+        dark: this.colors.greenDark
+      });
+      this.colorMap.set('C', {
+        light: this.colors.orangeLight,
+        dark: this.colors.orangeDark
+      });
+      this.colorMap.set('G', {
+        light: this.colors.redLight,
+        dark: this.colors.redDark
+      });
+      this.colorMap.set('T', {
+        light: this.colors.blueLight,
+        dark: this.colors.blueDark
+      });
+      this.colorMap.set('', {
+        light: this.colors.white,
+        dark: this.colors.white
+      });
+      this.colorMap.set('-', {
+        light: this.colors.greyLight,
+        dark: this.colors.greyDark
+      });
+      this.colorMap.set('+', {
+        light: this.colors.greyLight,
+        dark: this.colors.greyDark
+      });
+      this.colorStamps = [];
+    }
+
+    _createClass(NucleotideColorScheme, [{
+      key: "getState",
+      value: function getState(germplasm, chromosome, marker) {
+        var geno = this.dataSet.genotypeFor(germplasm, chromosome, marker);
+        return this.colorStamps[geno];
+      } // Generates a set of homozygous and heterozygous color stamps from the stateTable
+
+    }, {
+      key: "setupColorStamps",
+      value: function setupColorStamps(size, font, fontSize) {
+        var _this = this;
+
+        this.colorStamps = [];
+        this.stateTable.forEach(function (value, genotype) {
+          var stamp;
+
+          if (genotype.isHomozygous) {
+            stamp = _this.drawGradientSquare(size, genotype, font, fontSize);
+          } else {
+            stamp = _this.drawHetSquare(size, genotype, font, fontSize);
+          }
+
+          _this.colorStamps.push(stamp);
+        });
+      }
+    }, {
+      key: "drawGradientSquare",
+      value: function drawGradientSquare(size, genotype, font, fontSize) {
+        var color = this.colorMap.get(genotype.allele1);
+        var gradCanvas = document.createElement('canvas');
+        gradCanvas.width = size;
+        gradCanvas.height = size;
+        var gradientCtx = gradCanvas.getContext('2d');
+        var lingrad = gradientCtx.createLinearGradient(0, 0, size, size);
+        lingrad.addColorStop(0, color.light);
+        lingrad.addColorStop(1, color.dark);
+        gradientCtx.fillStyle = lingrad;
+        gradientCtx.fillRect(0, 0, size, size);
+        gradientCtx.fillStyle = 'rgb(0,0,0)';
+        gradientCtx.font = font;
+
+        if (size >= 10) {
+          var textWidth = gradientCtx.measureText(genotype.allele1).width;
+          gradientCtx.fillText(genotype.getText(), (size - textWidth) / 2, size - fontSize / 2);
+        }
+
+        return gradCanvas;
+      }
+    }, {
+      key: "drawHetSquare",
+      value: function drawHetSquare(size, genotype, font, fontSize) {
+        var color1 = this.colorMap.get(genotype.allele1);
+        var color2 = this.colorMap.get(genotype.allele2);
+        var gradCanvas = document.createElement('canvas');
+        gradCanvas.width = size;
+        gradCanvas.height = size;
+        var gradientCtx = gradCanvas.getContext('2d');
+        var lingrad = gradientCtx.createLinearGradient(0, 0, size, size);
+        lingrad.addColorStop(0, color1.light);
+        lingrad.addColorStop(1, color1.dark);
+        gradientCtx.fillStyle = lingrad;
+        gradientCtx.beginPath();
+        gradientCtx.lineTo(size, 0);
+        gradientCtx.lineTo(0, size);
+        gradientCtx.lineTo(0, 0);
+        gradientCtx.fill();
+        var lingrad2 = gradientCtx.createLinearGradient(0, 0, size, size);
+        lingrad2.addColorStop(0, color2.light);
+        lingrad2.addColorStop(1, color2.dark);
+        gradientCtx.fillStyle = lingrad2;
+        gradientCtx.beginPath();
+        gradientCtx.moveTo(size, 0);
+        gradientCtx.lineTo(size, size);
+        gradientCtx.lineTo(0, size);
+        gradientCtx.lineTo(size, 0);
+        gradientCtx.fill();
+        gradientCtx.fillStyle = 'rgb(0,0,0)';
+        gradientCtx.font = font;
+
+        if (size >= 10) {
+          var allele1Width = gradientCtx.measureText(genotype.allele1).width;
+          gradientCtx.fillText(genotype.allele1, (size / 2 - allele1Width) / 2, fontSize);
+          var allele2Width = gradientCtx.measureText(genotype.allele2).width;
+          gradientCtx.fillText(genotype.allele2, size - (size / 2 + allele2Width) / 2, size - fontSize / 4);
+        }
+
+        return gradCanvas;
+      }
+    }]);
+
+    return NucleotideColorScheme;
+  }();
+
+  var SimilarityColorScheme =
+  /*#__PURE__*/
+  function () {
+    function SimilarityColorScheme(dataSet, compIndex) {
+      _classCallCheck(this, SimilarityColorScheme);
+
+      this.dataSet = dataSet;
+      this.stateTable = this.dataSet.stateTable; // Line index of the line to be compared against
+
+      this.compIndex = compIndex;
+      this.colors = {
+        compGreenLight: 'rgb(90,180,90)',
+        compGreenDark: 'rgb(50,100,50)',
+        greenLight: 'rgb(171,255,171)',
+        greenDark: 'rgb(86,179,86)',
+        redLight: 'rgb(255,171,171)',
+        redDark: 'rgb(179,86,86)',
+        white: 'rgb(255,255,255)',
+        greyLight: 'rgb(210,210,210)',
+        greyDark: 'rgb(192,192,192)'
+      }; // These are the cases for establishing similarity to a given line
+
+      this.misMatch = 0;
+      this.compLine = 1;
+      this.matchComp = 2;
+      this.het1Match = 3;
+      this.het2Match = 4;
+      this.greyState = 5;
+      var size = this.stateTable.size; // Create this lookup table once which establishes which class of color stamp
+      // we should use for a given comparison between lines
+
+      this.lookupTable = this.createLookupTable(size); // An array of color stamps for each class of comparison
+
+      this.compStamps = [size];
+      this.matchStamps = [size];
+      this.misMatchStamps = [size];
+      this.het1MatchStamps = [size];
+      this.het2MatchStamps = [size];
+      this.greyStamps = [size];
+    }
+
+    _createClass(SimilarityColorScheme, [{
+      key: "createLookupTable",
+      value: function createLookupTable(length) {
+        var table = Array.from(Array(length), function () {
+          return new Array(length);
+        });
+        var stateTableKeys = Array.from(this.stateTable.keys());
+
+        for (var i = 0; i < length; i += 1) {
+          for (var j = 0; j < length; j += 1) {
+            // Default to misMatch
+            table[i][j] = this.misMatch; // States match
+
+            if (i === j) {
+              table[i][j] = this.matchComp;
+            } else {
+              var iStateKey = stateTableKeys[i];
+              var iStateValue = this.stateTable.get(iStateKey);
+              var jStateKey = stateTableKeys[j];
+              var jStateValue = this.stateTable.get(jStateKey); // Either state is missing
+
+              if (iStateValue === 0 || jStateValue === 0) {
+                table[i][j] = this.greyState; // Our state is homozygous and the comparison state is heterozygous 
+              } else if (iStateKey.isHomozygous && !jStateKey.isHomozygous) {
+                // if we match either allele in the comparison state give this the match class
+                if (iStateKey.allele1 === jStateKey.allele1 || iStateKey.allele1 === jStateKey.allele2) {
+                  table[i][j] = this.matchComp;
+                } // Our state is het and comp state is homozygous
+
+              } else if (!iStateKey.isHomozygous && jStateKey.isHomozygous) {
+                // First allele matches
+                if (iStateKey.allele1 === jStateKey.allele1 || iStateKey.allele1 === jStateKey.allele2) {
+                  table[i][j] = this.het1Match; // Second allele matches
+                } else if (iStateKey.allele2 === jStateKey.allele1 || iStateKey.allele2 === jStateKey.allele2) {
+                  table[i][j] = this.het2Match;
+                } // Neither state is homozygous
+
+              } else if (!iStateKey.isHomozygous && !jStateKey.isHomozygous) {
+                // First allele matches
+                if (iStateKey.allele1 === jStateKey.allele1 || iStateKey.allele1 === jStateKey.allele2) {
+                  table[i][j] = this.het1Match; // Second allele matches
+                } else if (iStateKey.allele2 === jStateKey.allele1 || iStateKey.allele2 === jStateKey.allele2) {
+                  table[i][j] = this.het2Match;
+                }
+              }
+            }
+          }
+        }
+
+        return table;
+      }
+    }, {
+      key: "getState",
+      value: function getState(germplasm, chromosome, marker) {
+        var compState = this.dataSet.genotypeFor(this.compIndex, chromosome, marker);
+        var genoState = this.dataSet.genotypeFor(germplasm, chromosome, marker);
+        var stamp; // Use the lookup value to determine which class of color stamps we should
+        // return
+
+        var lookupValue = this.lookupTable[genoState][compState];
+
+        if (this.compIndex === germplasm) {
+          stamp = this.compStamps[genoState];
+        } else if (lookupValue === this.misMatch) {
+          stamp = this.misMatchStamps[genoState];
+        } else if (lookupValue === this.compLine) {
+          stamp = this.compStamps[genoState];
+        } else if (lookupValue === this.matchComp) {
+          stamp = this.matchStamps[genoState];
+        } else if (lookupValue === this.het1Match) {
+          stamp = this.het1MatchStamps[genoState];
+        } else if (lookupValue === this.het2Match) {
+          stamp = this.het2MatchStamps[genoState];
+        } else if (lookupValue === this.greyState) {
+          stamp = this.greyStamps[genoState];
+        }
+
+        return stamp;
+      } // Generates a set of homozygous and heterozygous color stamps from the stateTable
+
+    }, {
+      key: "setupColorStamps",
+      value: function setupColorStamps(size, font, fontSize) {
+        var _this = this;
+
+        var length = this.stateTable.size;
+        this.compStamps = [length];
+        this.matchStamps = [length];
+        this.misMatchStamps = [length];
+        this.het1MatchStamps = [length];
+        this.het2MatchStamps = [length];
+        this.greyStamps = [length];
+        var index = 0;
+        this.stateTable.forEach(function (value, genotype) {
+          if (genotype.isHomozygous) {
+            _this.compStamps[index] = _this.drawGradientSquare(size, genotype, font, fontSize, _this.colors.compGreenLight, _this.colors.compGreenDark);
+            _this.matchStamps[index] = _this.drawGradientSquare(size, genotype, font, fontSize, _this.colors.greenLight, _this.colors.greenDark);
+            _this.misMatchStamps[index] = _this.drawGradientSquare(size, genotype, font, fontSize, _this.colors.redLight, _this.colors.redDark);
+            _this.greyStamps[index] = _this.drawGradientSquare(size, genotype, font, fontSize, _this.colors.greyLight, _this.colors.greyDark);
+          } else {
+            _this.compStamps[index] = _this.drawHetSquare(size, genotype, font, fontSize, _this.colors.compGreenLight, _this.colors.compGreenDark, _this.colors.compGreenLight, _this.colors.compGreenDark);
+            _this.matchStamps[index] = _this.drawHetSquare(size, genotype, font, fontSize, _this.colors.greenLight, _this.colors.greenDark, _this.colors.greenLight, _this.colors.greenDark);
+            _this.misMatchStamps[index] = _this.drawHetSquare(size, genotype, font, fontSize, _this.colors.redLight, _this.colors.redDark, _this.colors.redLight, _this.colors.redDark);
+            _this.het1MatchStamps[index] = _this.drawHetSquare(size, genotype, font, fontSize, _this.colors.greenLight, _this.colors.greenDark, _this.colors.redLight, _this.colors.redDark);
+            _this.het2MatchStamps[index] = _this.drawHetSquare(size, genotype, font, fontSize, _this.colors.redLight, _this.colors.redDark, _this.colors.greenLight, _this.colors.greenDark);
+            _this.greyStamps[index] = _this.drawHetSquare(size, genotype, font, fontSize, _this.colors.greyLight, _this.colors.greyDark, _this.colors.greyLight, _this.colors.greyDark);
+          }
+
+          index += 1;
+        });
+      }
+    }, {
+      key: "drawGradientSquare",
+      value: function drawGradientSquare(size, genotype, font, fontSize, colorLight, colorDark) {
+        var gradCanvas = document.createElement('canvas');
+        gradCanvas.width = size;
+        gradCanvas.height = size;
+        var gradientCtx = gradCanvas.getContext('2d');
+
+        if (genotype.allele1 === '') {
+          colorLight = colorDark = this.colors.white;
+        }
+
+        var lingrad = gradientCtx.createLinearGradient(0, 0, size, size);
+        lingrad.addColorStop(0, colorLight);
+        lingrad.addColorStop(1, colorDark);
+        gradientCtx.fillStyle = lingrad;
+        gradientCtx.fillRect(0, 0, size, size);
+        gradientCtx.fillStyle = 'rgb(0,0,0)';
+        gradientCtx.font = font;
+
+        if (size >= 10) {
+          var textWidth = gradientCtx.measureText(genotype.allele1).width;
+          gradientCtx.fillText(genotype.getText(), (size - textWidth) / 2, size - fontSize / 2);
+        }
+
+        return gradCanvas;
+      }
+    }, {
+      key: "drawHetSquare",
+      value: function drawHetSquare(size, genotype, font, fontSize, color1Light, color1Dark, color2Light, color2Dark) {
+        var gradCanvas = document.createElement('canvas');
+        gradCanvas.width = size;
+        gradCanvas.height = size;
+        var gradientCtx = gradCanvas.getContext('2d');
+
+        if (genotype.allele1 === '') {
+          color1Light = color1Dark = color2Light = color2Dark = this.colors.white;
+        }
+
+        var lingrad = gradientCtx.createLinearGradient(0, 0, size, size);
+        lingrad.addColorStop(0, color1Light);
+        lingrad.addColorStop(1, color1Dark);
+        gradientCtx.fillStyle = lingrad;
+        gradientCtx.beginPath();
+        gradientCtx.lineTo(size, 0);
+        gradientCtx.lineTo(0, size);
+        gradientCtx.lineTo(0, 0);
+        gradientCtx.fill();
+        var lingrad2 = gradientCtx.createLinearGradient(0, 0, size, size);
+        lingrad2.addColorStop(0, color2Light);
+        lingrad2.addColorStop(1, color2Dark);
+        gradientCtx.fillStyle = lingrad2;
+        gradientCtx.beginPath();
+        gradientCtx.moveTo(size, 0);
+        gradientCtx.lineTo(size, size);
+        gradientCtx.lineTo(0, size);
+        gradientCtx.lineTo(size, 0);
+        gradientCtx.fill();
+        gradientCtx.fillStyle = 'rgb(0,0,0)';
+        gradientCtx.font = font;
+
+        if (size >= 10) {
+          var allele1Width = gradientCtx.measureText(genotype.allele1).width;
+          gradientCtx.fillText(genotype.allele1, (size / 2 - allele1Width) / 2, fontSize);
+          var allele2Width = gradientCtx.measureText(genotype.allele2).width;
+          gradientCtx.fillText(genotype.allele2, size - (size / 2 + allele2Width) / 2, size - fontSize / 4);
+        }
+
+        return gradCanvas;
+      }
+    }, {
+      key: "setComparisonLineIndex",
+      value: function setComparisonLineIndex(newIndex) {
+        this.compIndex = newIndex;
+      }
+    }]);
+
+    return SimilarityColorScheme;
+  }();
+
   var GenotypeCanvas =
   /*#__PURE__*/
   function () {
@@ -1565,7 +1935,7 @@
       this.backBuffer.width = width;
       this.backBuffer.height = height;
       this.backContext = this.backBuffer.getContext('2d');
-      this.mapCanvasHeight = 40;
+      this.mapCanvasHeight = 60;
       this.nameCanvasWidth = 100;
       this.scrollbarWidth = 10;
       this.scrollbarHeight = 10;
@@ -1577,15 +1947,18 @@
       this.horizontalScrollbar = new ScrollBar(this.alleleCanvasWidth(), height, this.alleleCanvasWidth(), this.scrollbarHeight, false);
       this.translatedX = 0;
       this.translatedY = 0;
-      this.redraw = true;
       this.colorScheme = undefined;
       this.markerUnderMouse = undefined;
+      this.markerIndexUnderMouse = undefined;
+      this.chromosomeUnderMouse = -1;
       this.lineUnderMouse = undefined;
+      this.markerNameFont = '10px sans-serif';
       this.dataSet = undefined; // Visual start and end points for each chromosome
 
       this.chromosomeStarts = [];
       this.chromosomeEnds = [];
       this.chromosomeGapSize = 50;
+      this.comparisonLineIndex = 0;
     }
 
     _createClass(GenotypeCanvas, [{
@@ -1614,18 +1987,32 @@
         return this.canvas.height - this.mapCanvasHeight - this.scrollbarHeight;
       }
     }, {
-      key: "prevChromosomeStart",
-      value: function prevChromosomeStart() {
+      key: "chromosomeOffset",
+      value: function chromosomeOffset(xPos) {
         var _this = this;
 
         var chromStart = 0;
-        var tempX = this.translatedX - this.nameCanvasWidth;
-        this.chromosomeStarts.forEach(function (start, index) {
-          if (tempX >= start && tempX < _this.chromosomeEnds[index] || index > 0 && tempX >= _this.chromosomeEnds[index - 1] && tempX <= _this.chromosomeStarts[index]) {
-            chromStart = index * _this.chromosomeGapSize;
+        this.chromosomeEnds.forEach(function (end, index) {
+          if (xPos > end) {
+            chromStart = (index + 1) * _this.chromosomeGapSize;
           }
         });
         return chromStart;
+      }
+    }, {
+      key: "chromosomeIndexFor",
+      value: function chromosomeIndexFor(xPos) {
+        var _this2 = this;
+
+        var chrIndex = -1;
+        this.chromosomeEnds.forEach(function (end, index) {
+          var start = _this2.chromosomeStarts[index];
+
+          if (xPos >= start && xPos <= end) {
+            chrIndex = index;
+          }
+        });
+        return chrIndex;
       }
     }, {
       key: "init",
@@ -1635,19 +2022,18 @@
         this.font = this.updateFontSize();
         this.updateVisualPositions();
         this.colorScheme.setupColorStamps(this.boxSize, this.font, this.fontSize);
-        this.colorStamps = this.colorScheme.colorStamps;
         this.zoom(this.boxSize);
       }
     }, {
       key: "prerender",
-      value: function prerender() {
+      value: function prerender(redraw) {
         this.drawingContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        if (this.redraw) {
-          var dataWidth = Math.ceil(this.alleleCanvasWidth() / this.boxSize); // We need to calculate an offset because the gaps between chromosomes
+        if (redraw) {
+          // We need to calculate an offset because the gaps between chromosomes
           // aren't part of the data model
-
-          var offset = this.prevChromosomeStart();
+          var dataWidth = Math.ceil(this.alleleCanvasWidth() / this.boxSize);
+          var offset = this.chromosomeOffset(this.translatedX);
           var markerStart = Math.floor((this.translatedX - offset) / this.boxSize);
           var markerEnd = Math.min(markerStart + dataWidth, this.dataSet.markerCount());
           var germplasmStart = Math.floor(this.translatedY / this.boxSize);
@@ -1656,18 +2042,143 @@
           this.render(germplasmStart, germplasmEnd, markerStart, markerEnd, yWiggle);
         }
 
-        this.drawingContext.drawImage(this.backBuffer, 0, 0); // TODO: bring back in once we have everything else working;
-        // if (this.lineUnderMouse && this.markerUnderMouse) {
-        //   this.drawingContext.translate(this.lineNamesWidth, this.mapCanvasHeight);
-        //   this.drawingContext.globalAlpha = 0.4;
-        //   this.drawingContext.fillStyle = '#fff';
-        //   this.drawingContext.fillRect(this.markerUnderMouse * this.boxSize, 0, this.boxSize, this.alleleCanvasHeight);
-        //   this.drawingContext.fillRect(0, this.lineUnderMouse * this.boxSize, this.alleleCanvasWidth, this.boxSize);
-        //   this.drawingContext.translate(-this.lineNamesWidth, -this.mapCanvasHeight);
-        //   this.drawingContext.globalAlpha = 1;
-        // }
+        this.drawingContext.drawImage(this.backBuffer, 0, 0);
 
-        this.redraw = false;
+        if (this.chromosomeUnderMouse !== -1) {
+          this.renderCrosshair();
+          this.highlightMarker();
+          this.highlightLineName();
+        }
+      }
+    }, {
+      key: "calcMapMarkerPos",
+      value: function calcMapMarkerPos(marker, firstMarkerPos, mapScaleFactor, drawStart) {
+        var mapMarkerPos = (marker.position - firstMarkerPos) * mapScaleFactor;
+        mapMarkerPos = drawStart > 0 ? mapMarkerPos + drawStart : mapMarkerPos;
+        return mapMarkerPos;
+      }
+    }, {
+      key: "highlightMarker",
+      value: function highlightMarker() {
+        var _this3 = this;
+
+        var dataWidth = Math.ceil(this.alleleCanvasWidth() / this.boxSize);
+        var offset = this.chromosomeOffset(this.translatedX);
+        var markerStart = Math.floor((this.translatedX - offset) / this.boxSize);
+        var markerEnd = Math.min(markerStart + dataWidth, this.dataSet.markerCount());
+        var renderData = this.dataSet.markersToRender(markerStart, markerEnd);
+        var chrStart = this.chromosomeStarts[this.chromosomeUnderMouse];
+        var chrEnd = this.chromosomeEnds[this.chromosomeUnderMouse];
+        var drawStart = chrStart - this.translatedX;
+        var chromosome = this.dataSet.genomeMap.chromosomes[this.chromosomeUnderMouse];
+        var potentialWidth = drawStart > 0 ? this.alleleCanvasWidth() - drawStart : this.alleleCanvasWidth();
+        var chromosomeWidth = Math.min(chrEnd - this.translatedX, potentialWidth, chrEnd - chrStart);
+        renderData.forEach(function (chr) {
+          if (chr.chromosomeIndex === _this3.chromosomeUnderMouse && _this3.markerUnderMouse) {
+            // The data array can have too many markers in it due to the gaps between
+            // chromosomes, this is a fudge to ensure we don't try to draw too many markers
+            var chromosomeMarkerWidth = Math.max(0, Math.floor(chromosomeWidth / _this3.boxSize));
+            var dW = Math.min(chr.lastMarker - chr.firstMarker, chromosomeMarkerWidth);
+            var firstMarkerPos = chromosome.markers[chr.firstMarker].position;
+            var lastMarkerPos = chromosome.markers[chr.firstMarker + dW].position;
+            var dist = lastMarkerPos - firstMarkerPos;
+            var scaleFactor = chromosomeWidth / dist;
+
+            _this3.highlightMarkerName(firstMarkerPos, scaleFactor, drawStart);
+
+            _this3.drawingContext.save(); // Translate to the correct position to draw the map
+
+
+            _this3.drawingContext.translate(_this3.nameCanvasWidth, 10);
+
+            var xPos = drawStart + _this3.markerIndexUnderMouse * _this3.boxSize;
+            xPos += _this3.boxSize / 2;
+            _this3.drawingContext.strokeStyle = '#F00';
+
+            _this3.renderMarker(_this3.drawingContext, _this3.markerUnderMouse, xPos, firstMarkerPos, scaleFactor, drawStart);
+
+            _this3.drawingContext.restore();
+          }
+        });
+      }
+    }, {
+      key: "highlightMarkerName",
+      value: function highlightMarkerName(firstMarkerPos, scaleFactor, drawStart) {
+        if (this.markerUnderMouse) {
+          this.drawingContext.save();
+          this.drawingContext.translate(this.nameCanvasWidth, 10);
+          this.drawingContext.fillStyle = '#F00';
+          this.drawingContext.font = this.markerNameFont;
+          var xPos = this.calcMapMarkerPos(this.markerUnderMouse, firstMarkerPos, scaleFactor, drawStart);
+          var text = "".concat(this.markerUnderMouse.name, " (").concat(this.markerUnderMouse.position, ")"); // Measure the text width so we can guarantee it doesn't get drawn off
+          // the right hand side of the display
+
+          var textWidth = this.drawingContext.measureText(text).width;
+          var halfTextWidth = textWidth / 2;
+          xPos -= halfTextWidth;
+
+          if (xPos < 0) {
+            xPos = 0;
+          } else if (xPos + textWidth > this.alleleCanvasWidth()) {
+            xPos = this.alleleCanvasWidth() - textWidth;
+          }
+
+          this.drawingContext.fillText(text, xPos, 0);
+          this.drawingContext.restore();
+        }
+      }
+    }, {
+      key: "highlightLineName",
+      value: function highlightLineName() {
+        if (this.lineUnderMouse) {
+          this.drawingContext.save();
+          this.drawingContext.translate(0, this.mapCanvasHeight);
+          this.drawingContext.fillStyle = '#F00';
+          this.drawingContext.font = this.font;
+          var germplasmStart = Math.floor(this.translatedY / this.boxSize);
+          var yWiggle = this.translatedY - germplasmStart * this.boxSize;
+          var yPos = this.lineUnderMouse * this.boxSize - yWiggle;
+          var name = this.dataSet.germplasmList[this.lineIndexUnderMouse].name;
+          var y = yPos + (this.boxSize - this.fontSize / 2);
+          this.drawingContext.fillText(name, 0, y);
+          this.drawingContext.restore();
+        }
+      }
+    }, {
+      key: "renderCrosshair",
+      value: function renderCrosshair() {
+        // Setup crosshair drawing parameters
+        this.drawingContext.save();
+        this.drawingContext.translate(this.nameCanvasWidth, this.mapCanvasHeight);
+        this.drawingContext.globalAlpha = 0.4;
+        this.drawingContext.fillStyle = '#fff'; // Clip the canvas to prevent over-drawing of the crosshair
+
+        var region = new Path2D();
+        region.rect(0, 0, this.alleleCanvasWidth(), this.alleleCanvasHeight());
+        this.drawingContext.clip(region); // Render each element of the crosshair
+
+        this.renderVerticalCrosshairLine();
+        this.renderHorizontalCrosshairLine(); // Reset the drawing parameters for the rest of the render code
+
+        this.drawingContext.translate(-this.nameCanvasWidth, -this.mapCanvasHeight);
+        this.drawingContext.globalAlpha = 1;
+        this.drawingContext.restore();
+      }
+    }, {
+      key: "renderVerticalCrosshairLine",
+      value: function renderVerticalCrosshairLine() {
+        var chrStart = this.chromosomeStarts[this.chromosomeUnderMouse];
+        var drawStart = chrStart - this.translatedX;
+        var xPos = drawStart + this.markerIndexUnderMouse * this.boxSize;
+        this.drawingContext.fillRect(xPos, 0, this.boxSize, this.alleleCanvasHeight());
+      }
+    }, {
+      key: "renderHorizontalCrosshairLine",
+      value: function renderHorizontalCrosshairLine() {
+        var germplasmStart = Math.floor(this.translatedY / this.boxSize);
+        var yWiggle = this.translatedY - germplasmStart * this.boxSize;
+        var yPos = this.lineUnderMouse * this.boxSize - yWiggle;
+        this.drawingContext.fillRect(0, yPos, this.alleleCanvasWidth(), this.boxSize);
       }
     }, {
       key: "render",
@@ -1680,48 +2191,65 @@
       }
     }, {
       key: "renderMarker",
-      value: function renderMarker(marker, genoMarkerPos, firstMarkerPos, mapScaleFactor, drawStart) {
-        var mapMarkerPos = drawStart + (marker.position - firstMarkerPos) * mapScaleFactor;
-        this.backContext.beginPath(); // Draw vertical line on top of map rectangle
+      value: function renderMarker(mapCanvas, marker, genoMarkerPos, firstMarkerPos, mapScaleFactor, drawStart) {
+        var mapMarkerPos = this.calcMapMarkerPos(marker, firstMarkerPos, mapScaleFactor, drawStart); // console.log(drawStart, firstMarkerPos, marker.position, mapMarkerPos);
 
-        this.backContext.moveTo(mapMarkerPos, 0);
-        this.backContext.lineTo(mapMarkerPos, 10); // Draw diagonal line to marker position on the genotype canvas
+        mapCanvas.beginPath(); // Draw vertical line on top of map rectangle
 
-        this.backContext.lineTo(genoMarkerPos, 20); // Draw a vertical line down to the genotype canvas
+        mapCanvas.moveTo(mapMarkerPos, 0);
+        mapCanvas.lineTo(mapMarkerPos, 10); // Draw diagonal line to marker position on the genotype canvas
 
-        this.backContext.lineTo(genoMarkerPos, 30);
-        this.backContext.stroke();
+        mapCanvas.lineTo(genoMarkerPos, 30); // Draw a vertical line down to the genotype canvas
+
+        mapCanvas.lineTo(genoMarkerPos, 40);
+        mapCanvas.stroke();
       }
     }, {
       key: "renderMarkers",
       value: function renderMarkers(renderData) {
-        var _this2 = this;
+        var _this4 = this;
 
         renderData.forEach(function (chr) {
-          var chrStart = _this2.chromosomeStarts[chr.chromosomeIndex];
-          var chrEnd = _this2.chromosomeEnds[chr.chromosomeIndex];
-          var drawStart = chrStart - _this2.translatedX;
-          var chromosome = _this2.dataSet.genomeMap.chromosomes[chr.chromosomeIndex];
-          var chromosomeWidth = Math.min(chrEnd - chrStart, _this2.alleleCanvasWidth() - drawStart);
+          var chrStart = _this4.chromosomeStarts[chr.chromosomeIndex];
+          var chrEnd = _this4.chromosomeEnds[chr.chromosomeIndex];
+          var drawStart = chrStart - _this4.translatedX;
+          var chromosome = _this4.dataSet.genomeMap.chromosomes[chr.chromosomeIndex];
+          var potentialWidth = drawStart > 0 ? _this4.alleleCanvasWidth() - drawStart : _this4.alleleCanvasWidth();
+          var chromosomeWidth = Math.min(chrEnd - _this4.translatedX, potentialWidth, chrEnd - chrStart); // The data array can have too many markers in it due to the gaps between
+          // chromosomes, this is a fudge to ensure we don't try to draw too many markers
+
+          var chromosomeMarkerWidth = Math.max(0, Math.floor(chromosomeWidth / _this4.boxSize));
+          var dataWidth = Math.min(chr.lastMarker - chr.firstMarker, chromosomeMarkerWidth);
           var firstMarkerPos = chromosome.markers[chr.firstMarker].position;
-          var lastMarkerPos = chromosome.markers[chr.lastMarker].position;
+          var lastMarkerPos = chromosome.markers[chr.firstMarker + dataWidth].position;
           var dist = lastMarkerPos - firstMarkerPos;
           var scaleFactor = chromosomeWidth / dist;
 
           for (var markerIndex = chr.firstMarker; markerIndex <= chr.lastMarker; markerIndex += 1) {
-            var marker = _this2.dataSet.genomeMap.chromosomes[chr.chromosomeIndex].markers[markerIndex];
-            var xPos = drawStart + markerIndex * _this2.boxSize;
-            xPos += _this2.boxSize / 2;
+            var marker = _this4.dataSet.genomeMap.chromosomes[chr.chromosomeIndex].markers[markerIndex];
+            var xPos = drawStart + markerIndex * _this4.boxSize;
+            xPos += _this4.boxSize / 2;
 
-            _this2.renderMarker(marker, xPos, firstMarkerPos, scaleFactor, drawStart);
+            _this4.renderMarker(_this4.backContext, marker, xPos, firstMarkerPos, scaleFactor, drawStart);
           }
+        });
+      }
+    }, {
+      key: "renderChromosomes",
+      value: function renderChromosomes(chromosomeData) {
+        var _this5 = this;
+
+        chromosomeData.forEach(function (chr) {
+          var chrStart = _this5.chromosomeStarts[chr.chromosomeIndex];
+          var chrEnd = _this5.chromosomeEnds[chr.chromosomeIndex];
+          var drawStart = chrStart - _this5.translatedX;
+
+          _this5.backContext.strokeRect(drawStart, 1, chrEnd - chrStart, 10);
         });
       }
     }, {
       key: "renderMap",
       value: function renderMap(markerStart, markerEnd) {
-        var _this3 = this;
-
         this.backContext.save(); // Set the line style for drawing the map and markers
 
         this.backContext.lineWidth = 1;
@@ -1732,22 +2260,16 @@
         region.rect(this.nameCanvasWidth, 0, this.alleleCanvasWidth(), this.mapCanvasHeight);
         this.backContext.clip(region); // Translate to the correct position to draw the map
 
-        this.backContext.translate(this.nameCanvasWidth, 0);
+        this.backContext.translate(this.nameCanvasWidth, 10);
         var renderData = this.dataSet.markersToRender(markerStart, markerEnd);
-        renderData.forEach(function (chr) {
-          var chrStart = _this3.chromosomeStarts[chr.chromosomeIndex];
-          var chrEnd = _this3.chromosomeEnds[chr.chromosomeIndex];
-          var drawStart = chrStart - _this3.translatedX;
-
-          _this3.backContext.strokeRect(drawStart, 1, chrEnd - chrStart, 10);
-        });
+        this.renderChromosomes(renderData);
         this.renderMarkers(renderData);
         this.backContext.restore();
       }
     }, {
       key: "renderGermplasmNames",
       value: function renderGermplasmNames(germplasmStart, germplasmEnd, yWiggle) {
-        var _this4 = this;
+        var _this6 = this;
 
         this.backContext.save(); // Create a clipping region so that lineNames can't creep up above the line
         // name canvas
@@ -1762,16 +2284,16 @@
         this.backContext.font = this.font;
         this.backContext.translate(0, this.mapCanvasHeight);
         lineNames.forEach(function (name, idx) {
-          var y = idx * _this4.boxSize - yWiggle + (_this4.boxSize - _this4.fontSize / 2);
+          var y = idx * _this6.boxSize - yWiggle + (_this6.boxSize - _this6.fontSize / 2);
 
-          _this4.backContext.fillText(name, 0, y);
+          _this6.backContext.fillText(name, 0, y);
         });
         this.backContext.restore();
       }
     }, {
       key: "renderGermplasm",
       value: function renderGermplasm(germplasmStart, germplasmEnd, markerStart, markerEnd, yWiggle) {
-        var _this5 = this;
+        var _this7 = this;
 
         this.backContext.save();
         var renderData = this.dataSet.markersToRender(markerStart, markerEnd); // Clip so that we can only draw into the region that is intended to be the
@@ -1781,19 +2303,18 @@
         region.rect(this.nameCanvasWidth, this.mapCanvasHeight, this.canvas.width, this.canvas.height);
         this.backContext.clip(region);
         this.backContext.translate(this.nameCanvasWidth, this.mapCanvasHeight);
-        var colorStamps = this.colorScheme.colorStamps;
 
         var _loop = function _loop(germplasm, line) {
-          var yPos = line * _this5.boxSize - yWiggle;
+          var yPos = line * _this7.boxSize - yWiggle;
           renderData.forEach(function (chr) {
-            var chrStart = _this5.chromosomeStarts[chr.chromosomeIndex] - _this5.translatedX;
+            var chrStart = _this7.chromosomeStarts[chr.chromosomeIndex] - _this7.translatedX;
 
             for (var marker = chr.firstMarker; marker <= chr.lastMarker; marker += 1) {
-              var xPos = chrStart + marker * _this5.boxSize;
+              var xPos = chrStart + marker * _this7.boxSize;
 
-              var geno = _this5.dataSet.genotypeFor(germplasm, chr.chromosomeIndex, marker);
+              var stamp = _this7.colorScheme.getState(germplasm, chr.chromosomeIndex, marker);
 
-              _this5.backContext.drawImage(colorStamps[geno], xPos, yPos);
+              _this7.backContext.drawImage(stamp, xPos, yPos);
             }
           });
         };
@@ -1907,8 +2428,7 @@
           this.verticalScrollbar.move(this.verticalScrollbar.x, scrollY);
         }
 
-        this.redraw = true;
-        this.prerender();
+        this.prerender(true);
       }
     }, {
       key: "dragHorizontalScrollbar",
@@ -1928,34 +2448,51 @@
           this.horizontalScrollbar.move(scrollX, this.horizontalScrollbar.y);
         }
 
-        this.redraw = true;
-        this.prerender();
+        this.prerender(true);
       }
     }, {
       key: "move",
       value: function move(diffX, diffY) {
         this.moveX(diffX);
         this.moveY(diffY);
-        this.redraw = true;
-        this.prerender();
+        this.prerender(true);
       }
     }, {
       key: "mouseOver",
       value: function mouseOver(x, y) {
         // We need to calculate an offset because the gaps between chromosomes
         // aren't part of the data model
-        var offset = this.prevChromosomeStart();
-        var markerIndex = Math.floor((x - offset - this.nameCanvasWidth) / this.boxSize);
-        var markerUnderMouse = this.dataSet.markerAt(markerIndex); // console.log(this.dataSet.genomeMap.chromosomeAndMarkerFor(markerIndex));
-        // console.log(this.dataSet.genomeMap.chromosomes[markerUnderMouse[0].chromosomeIndex].markers[markerUnderMouse[0].firstMarker].name);
-        // if (x >= this.nameCanvasWidth && x < this.backBuffer.width && y >= this.mapCanvasHeight && y < this.backBuffer.height) {
-        //   this.markerUnderMouse = Math.floor((x - this.nameCanvasWidth) / this.boxSize);
-        //   this.lineUnderMouse = Math.floor((y - this.mapCanvasHeight) / this.boxSize);
-        // } else {
-        //   this.lineUnderMouse = undefined;
-        //   this.markerUnderMouse = undefined;
-        // }
-        // this.prerender();
+        var mouseXPos = x - this.nameCanvasWidth;
+        var mouseXPosCanvas = this.translatedX + mouseXPos;
+        var mouseYPos = y - this.mapCanvasHeight;
+
+        if (mouseXPos > 0 && mouseXPos < this.alleleCanvasWidth()) {
+          // Calculate the marker's index in the dataset and get the marker data
+          var offset = this.chromosomeOffset(mouseXPosCanvas);
+          var markerIndex = Math.floor((this.translatedX - offset + mouseXPos) / this.boxSize);
+          var marker = this.dataSet.markerAt(markerIndex);
+          this.markerUnderMouse = marker.marker;
+          this.markerIndexUnderMouse = marker.markerIndex;
+        } else {
+          this.markerUnderMouse = undefined;
+          this.markerIndexUnderMouse = undefined;
+          this.lineUnderMouse = undefined;
+        } // Used as a flag to not render the crosshair when the mouse is between
+        // chromosomes
+
+
+        this.chromosomeUnderMouse = this.chromosomeIndexFor(mouseXPosCanvas);
+
+        if (mouseYPos > 0 && mouseYPos < this.alleleCanvasHeight()) {
+          this.lineUnderMouse = Math.max(0, Math.floor(mouseYPos / this.boxSize));
+          this.lineIndexUnderMouse = this.lineUnderMouse + Math.floor(this.translatedY / this.boxSize);
+        } else {
+          this.markerUnderMouse = undefined;
+          this.markerIndexUnderMouse = undefined;
+          this.lineUnderMouse = undefined;
+        }
+
+        this.prerender(false);
       }
     }, {
       key: "updateFontSize",
@@ -1983,13 +2520,13 @@
     }, {
       key: "updateCanvasWidths",
       value: function updateCanvasWidths() {
-        var _this6 = this;
+        var _this8 = this;
 
         // Find the longest germplasm name and adjust the width of the germplasm name
         // rendering area accordingly
         var germplasm = this.dataSet.germplasmList;
         var longestName = Math.max.apply(Math, _toConsumableArray(germplasm.map(function (g) {
-          return _this6.backContext.measureText(g.name).width;
+          return _this8.backContext.measureText(g.name).width;
         })));
         this.nameCanvasWidth = longestName;
         this.horizontalScrollbar.updateWidth(this.alleleCanvasWidth());
@@ -1997,14 +2534,14 @@
     }, {
       key: "updateVisualPositions",
       value: function updateVisualPositions() {
-        var _this7 = this;
+        var _this9 = this;
 
         this.chromosomeStarts = Array.from(this.dataSet.genomeMap.chromosomeStarts.values()).map(function (v, idx) {
-          return v * _this7.boxSize + idx * _this7.chromosomeGapSize;
+          return v * _this9.boxSize + idx * _this9.chromosomeGapSize;
         });
         this.chromosomeEnds = [];
         this.dataSet.genomeMap.chromosomes.forEach(function (chr, idx) {
-          _this7.chromosomeEnds.push(_this7.chromosomeStarts[idx] + chr.markerCount() * _this7.boxSize);
+          _this9.chromosomeEnds.push(_this9.chromosomeStarts[idx] + chr.markerCount() * _this9.boxSize);
         });
       }
     }, {
@@ -2040,8 +2577,26 @@
           this.verticalScrollbar.move(this.verticalScrollbar.x, 0);
         }
 
-        this.redraw = true;
-        this.prerender();
+        this.prerender(true);
+      }
+    }, {
+      key: "setColorScheme",
+      value: function setColorScheme(scheme) {
+        if (scheme === 'nucleotideScheme') {
+          this.colorScheme = new NucleotideColorScheme(this.dataSet);
+          this.colorScheme.setupColorStamps(this.boxSize, this.font, this.fontSize);
+          this.prerender(true);
+        } else if (scheme === 'similarityScheme') {
+          this.colorScheme = new SimilarityColorScheme(this.dataSet, this.comparisonLineIndex);
+          this.colorScheme.setupColorStamps(this.boxSize, this.font, this.fontSize);
+          this.prerender(true);
+        }
+      }
+    }, {
+      key: "setComparisonLineIndex",
+      value: function setComparisonLineIndex(newIndex) {
+        this.colorScheme.setComparisonLineIndex(newIndex);
+        this.prerender(true);
       } //   rainbowColor(numOfSteps, step) {
       //     // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
       //     // Adam Cole, 2011-Sept-14
@@ -2082,6 +2637,7 @@
       this.draggingCanvas = false;
       this.draggingVerticalScrollbar = false;
       this.draggingHorizontalScrollbar = false;
+      this.contextMenuY = null;
       this.genotypeCanvas.canvas.addEventListener('mousedown', function (e) {
         // The following block of code is used to determine if we are scrolling
         // using the scrollbar widget, rather than grabbing the canvas
@@ -2113,12 +2669,9 @@
         }
       });
       this.genotypeCanvas.canvas.addEventListener('mousemove', function (e) {
-        var rect = _this.genotypeCanvas.canvas.getBoundingClientRect();
+        var mousePos = _this.getCanvasMouseLocation(e.clientX, e.clientY);
 
-        var x = (e.clientX - rect.left) / (rect.right - rect.left) * _this.genotypeCanvas.backBuffer.width;
-        var y = (e.clientY - rect.top) / (rect.bottom - rect.top) * _this.genotypeCanvas.backBuffer.height;
-
-        _this.genotypeCanvas.mouseOver(x, y);
+        _this.genotypeCanvas.mouseOver(mousePos.x, mousePos.y);
       });
       this.genotypeCanvas.canvas.addEventListener('mouseleave', function () {
         _this.genotypeCanvas.mouseOver(undefined, undefined);
@@ -2137,9 +2690,38 @@
           _this.dragCanvas(e.pageX, e.pageY);
         }
       });
+      var nucleotideRadio = document.getElementById('nucleotideScheme');
+      nucleotideRadio.addEventListener('change', function () {
+        var lineSelect = document.getElementById('lineSelect');
+        lineSelect.disabled = true;
+
+        _this.genotypeCanvas.setColorScheme('nucleotideScheme');
+      });
+      var similarityRadio = document.getElementById('similarityScheme');
+      similarityRadio.addEventListener('change', function () {
+        var lineSelect = document.getElementById('lineSelect');
+        lineSelect.disabled = false;
+
+        _this.genotypeCanvas.setColorScheme('similarityScheme');
+      });
+      var lineSelect = document.getElementById('lineSelect');
+      lineSelect.addEventListener('change', function (event) {
+        _this.genotypeCanvas.setComparisonLineIndex(event.target.selectedIndex);
+      });
     }
 
     _createClass(CanvasController, [{
+      key: "getCanvasMouseLocation",
+      value: function getCanvasMouseLocation(clientX, clientY) {
+        var rect = this.genotypeCanvas.canvas.getBoundingClientRect();
+        var x = (clientX - rect.left) / (rect.right - rect.left) * this.genotypeCanvas.backBuffer.width;
+        var y = (clientY - rect.top) / (rect.bottom - rect.top) * this.genotypeCanvas.backBuffer.height;
+        return {
+          x: x,
+          y: y
+        };
+      }
+    }, {
       key: "isOverVerticalScrollbar",
       value: function isOverVerticalScrollbar(x, verticalScrollbar) {
         return x >= verticalScrollbar.x && x <= verticalScrollbar.x + verticalScrollbar.widget.width;
@@ -2248,6 +2830,14 @@
 
     this.name = name;
     this.genotypeData = genotypeData;
+  };
+
+  var Marker = function Marker(name, chromosome, position) {
+    _classCallCheck(this, Marker);
+
+    this.name = name;
+    this.chromosome = chromosome;
+    this.position = position;
   };
 
   function unwrapExports (x) {
@@ -3091,11 +3681,16 @@
         return positions;
       }
     }, {
-      key: "chromosomeAndMarkerFor",
-      value: function chromosomeAndMarkerFor(dataIndex) {
+      key: "markerAt",
+      value: function markerAt(dataIndex) {
         var foundChromosomes = this.intervalTree.search(dataIndex, dataIndex);
-        var chromosome = this.chromosomes.indexOf(foundChromosomes[0]);
+        var chromosome = foundChromosomes[0];
         var chromStart = this.chromosomeStarts.get(chromosome);
+        var markerIndex = Math.max(dataIndex - chromStart, 0);
+        return {
+          marker: chromosome.markers[markerIndex],
+          markerIndex: markerIndex
+        };
       }
     }, {
       key: "markerByName",
@@ -3299,8 +3894,9 @@
         var markerNames = variantSetCalls.filter(function (v) {
           return v.callSetName === firstGenoName;
         }).map(function (v) {
-          return v.variantName;
+          return v.markerName;
         });
+        console.log(markerNames);
         var markers = [];
         markerNames.forEach(function (name, idx) {
           var marker = new Marker(name, 'unmapped', idx);
@@ -3356,145 +3952,6 @@
     return GenotypeImporter;
   }();
 
-  var NucleotideColorScheme =
-  /*#__PURE__*/
-  function () {
-    function NucleotideColorScheme(stateTable) {
-      _classCallCheck(this, NucleotideColorScheme);
-
-      this.stateTable = stateTable;
-      this.colors = {
-        greenLight: 'rgb(171,255,171)',
-        greenDark: 'rgb(86,179,86)',
-        redLight: 'rgb(255,171,171)',
-        redDark: 'rgb(179,86,86)',
-        blueLight: 'rgb(171,171,255)',
-        blueDark: 'rgb(86,86,179)',
-        orangeLight: 'rgb(255,228,171)',
-        orangeDark: 'rgb(179,114,86)',
-        white: 'rgb(255,255,255)',
-        greyLight: 'rgb(210,210,210)',
-        greyDark: 'rgb(192,192,192)'
-      };
-      this.colorMap = new Map();
-      this.colorMap.set('A', {
-        light: this.colors.greenLight,
-        dark: this.colors.greenDark
-      });
-      this.colorMap.set('C', {
-        light: this.colors.orangeLight,
-        dark: this.colors.orangeDark
-      });
-      this.colorMap.set('G', {
-        light: this.colors.redLight,
-        dark: this.colors.redDark
-      });
-      this.colorMap.set('T', {
-        light: this.colors.blueLight,
-        dark: this.colors.blueDark
-      });
-      this.colorMap.set('', {
-        light: this.colors.white,
-        dark: this.colors.white
-      });
-      this.colorMap.set('-', {
-        light: this.colors.greyLight,
-        dark: this.colors.greyDark
-      });
-      this.colorMap.set('+', {
-        light: this.colors.greyLight,
-        dark: this.colors.greyDark
-      });
-      this.colorStamps = [];
-    } // Generates a set of homozygous and heterozygous color stamps from the stateTable
-
-
-    _createClass(NucleotideColorScheme, [{
-      key: "setupColorStamps",
-      value: function setupColorStamps(size, font, fontSize) {
-        var _this = this;
-
-        this.colorStamps = [];
-        this.stateTable.forEach(function (value, genotype) {
-          var stamp;
-
-          if (genotype.isHomozygous) {
-            stamp = _this.drawGradientSquare(size, genotype, font, fontSize);
-          } else {
-            stamp = _this.drawHetSquare(size, genotype, font, fontSize);
-          }
-
-          _this.colorStamps.push(stamp);
-        });
-      }
-    }, {
-      key: "drawGradientSquare",
-      value: function drawGradientSquare(size, genotype, font, fontSize) {
-        var color = this.colorMap.get(genotype.allele1);
-        var gradCanvas = document.createElement('canvas');
-        gradCanvas.width = size;
-        gradCanvas.height = size;
-        var gradientCtx = gradCanvas.getContext('2d');
-        var lingrad = gradientCtx.createLinearGradient(0, 0, size, size);
-        lingrad.addColorStop(0, color.light);
-        lingrad.addColorStop(1, color.dark);
-        gradientCtx.fillStyle = lingrad;
-        gradientCtx.fillRect(0, 0, size, size);
-        gradientCtx.fillStyle = 'rgb(0,0,0)';
-        gradientCtx.font = font;
-
-        if (size >= 10) {
-          var textWidth = gradientCtx.measureText(genotype.allele1).width;
-          gradientCtx.fillText(genotype.getText(), (size - textWidth) / 2, size - fontSize / 2);
-        }
-
-        return gradCanvas;
-      }
-    }, {
-      key: "drawHetSquare",
-      value: function drawHetSquare(size, genotype, font, fontSize) {
-        var color1 = this.colorMap.get(genotype.allele1);
-        var color2 = this.colorMap.get(genotype.allele2);
-        var gradCanvas = document.createElement('canvas');
-        gradCanvas.width = size;
-        gradCanvas.height = size;
-        var gradientCtx = gradCanvas.getContext('2d');
-        var lingrad = gradientCtx.createLinearGradient(0, 0, size, size);
-        lingrad.addColorStop(0, color1.light);
-        lingrad.addColorStop(1, color1.dark);
-        gradientCtx.fillStyle = lingrad;
-        gradientCtx.beginPath();
-        gradientCtx.lineTo(size, 0);
-        gradientCtx.lineTo(0, size);
-        gradientCtx.lineTo(0, 0);
-        gradientCtx.fill();
-        var lingrad2 = gradientCtx.createLinearGradient(0, 0, size, size);
-        lingrad2.addColorStop(0, color2.light);
-        lingrad2.addColorStop(1, color2.dark);
-        gradientCtx.fillStyle = lingrad2;
-        gradientCtx.beginPath();
-        gradientCtx.moveTo(size, 0);
-        gradientCtx.lineTo(size, size);
-        gradientCtx.lineTo(0, size);
-        gradientCtx.lineTo(size, 0);
-        gradientCtx.fill();
-        gradientCtx.fillStyle = 'rgb(0,0,0)';
-        gradientCtx.font = font;
-
-        if (size >= 10) {
-          var allele1Width = gradientCtx.measureText(genotype.allele1).width;
-          gradientCtx.fillText(genotype.allele1, (size / 2 - allele1Width) / 2, fontSize);
-          var allele2Width = gradientCtx.measureText(genotype.allele2).width;
-          gradientCtx.fillText(genotype.allele2, size - (size / 2 + allele2Width) / 2, size - fontSize / 4);
-        }
-
-        return gradCanvas;
-      }
-    }]);
-
-    return NucleotideColorScheme;
-  }();
-
   var MapImporter =
   /*#__PURE__*/
   function () {
@@ -3525,7 +3982,7 @@
 
           this.chromosomeNames.add(chromosome); // Create a marker object and add it to our array of markers
 
-          var marker = new Marker(markerName, chromosome, parseInt(pos.replace(/,/g, ''), 10));
+          var marker = new Marker(markerName, chromosome, parseFloat(pos.replace(/,/g, ''), 10));
           this.markerData.push(marker);
         }
       }
@@ -3583,7 +4040,7 @@
 
         this.chromosomeNames.add(chromosome); // Create a marker object and add it to our array of markers
 
-        var marker = new Marker(name, chromosome, parseInt(position.replace(/,/g, ''), 10));
+        var marker = new Marker(name, chromosome, position);
         this.markerData.push(marker);
       }
     }]);
@@ -3594,11 +4051,12 @@
   var DataSet =
   /*#__PURE__*/
   function () {
-    function DataSet(genomeMap, germplasmList) {
+    function DataSet(genomeMap, germplasmList, stateTable) {
       _classCallCheck(this, DataSet);
 
       this.genomeMap = genomeMap;
       this.germplasmList = germplasmList;
+      this.stateTable = stateTable;
     }
 
     _createClass(DataSet, [{
@@ -3619,7 +4077,7 @@
     }, {
       key: "markerAt",
       value: function markerAt(markerIndex) {
-        return this.genomeMap.chromosomePositionsFor(markerIndex, markerIndex);
+        return this.genomeMap.markerAt(markerIndex);
       }
     }, {
       key: "markerCount",
@@ -3639,31 +4097,190 @@
   function GenotypeRenderer() {
     var genotypeRenderer = {}; // Variables for referring to the genotype canvas
 
-    var genotypeCanvas;
+    var genotypeCanvas; // TODO: need to investigate a proper clean way to implement this controller
+    // functionality
+    // eslint-disable-next-line no-unused-vars
+
     var canvasController;
     var boxSize = 16;
     var colorScheme;
     var genomeMap;
     var dataSet;
 
-    genotypeRenderer.renderGenotypesBrapi = function (domParent, width, height, server, matrixId, mapId, authToken) {
+    function sendEvent(eventName, domParent) {
+      // TODO: Invesitgate using older event emitting code for IE support
+      var canvasHolder = document.getElementById(domParent.slice(1)); // Create the event.
+
+      var event = new Event(eventName);
+      canvasHolder.dispatchEvent(event);
+    }
+
+    function zoom(size) {
+      genotypeCanvas.zoom(size, colorScheme);
+    }
+
+    function createRendererComponents(domParent, width, height) {
+      var canvasHolder = document.getElementById(domParent.slice(1));
+      genotypeCanvas = new GenotypeCanvas(width, height, boxSize);
+      canvasHolder.append(genotypeCanvas.canvas);
+      var zoomDiv = document.createElement('div');
+      zoomDiv.id = 'zoom-holder';
+      var zoomLabel = document.createElement('label');
+      zoomLabel.setAttribute('for', 'zoom-control');
+      zoomLabel.innerHTML = 'Zoom:';
+      var range = document.createElement('input');
+      range.setAttribute('type', 'range');
+      range.min = 2;
+      range.max = 64;
+      range.value = 16;
+      range.addEventListener('change', function () {
+        zoom(range.value);
+      });
+      range.addEventListener('input', function () {
+        zoom(range.value);
+      });
+      var colorButton = document.createElement('button');
+      colorButton.id = 'colorButton';
+      var textnode = document.createTextNode('Color schemes...');
+      colorButton.appendChild(textnode);
+      var fieldSet = document.createElement('fieldset');
+      var legend = document.createElement('legend');
+      var legendText = document.createTextNode('Color Schemes');
+      legend.appendChild(legendText);
+      fieldSet.appendChild(legend);
+      addRadioButton('selectedScheme', 'nucleotideScheme', 'Nucleotide', true, fieldSet);
+      addRadioButton('selectedScheme', 'similarityScheme', 'Similarity to line', false, fieldSet);
+      var lineSelect = document.createElement('select');
+      lineSelect.id = 'lineSelect';
+      lineSelect.disabled = true;
+      fieldSet.appendChild(lineSelect);
+      zoomDiv.appendChild(zoomLabel);
+      zoomDiv.appendChild(range);
+      zoomDiv.appendChild(fieldSet);
+      canvasHolder.appendChild(zoomDiv); // createColorModal(canvasHolder);
+
+      canvasController = new CanvasController(genotypeCanvas);
+    }
+
+    function addRadioButton(name, id, text, checked, parent) {
+      var radio = document.createElement('input');
+      radio.setAttribute('type', 'radio');
+      radio.name = name;
+      radio.id = id;
+      radio.checked = checked;
+      var radioLabel = document.createElement('label');
+      radioLabel.htmlFor = id;
+      var labelText = document.createTextNode(text);
+      radioLabel.appendChild(labelText);
+      parent.appendChild(radio);
+      parent.appendChild(radioLabel);
+    }
+
+    function processMarkerPositionsCall(client, url, params) {
+      var markerpositions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
+      return client.get(url, params).then(function (response) {
+        var _response$data$metada = response.data.metadata.pagination,
+            currentPage = _response$data$metada.currentPage,
+            totalPages = _response$data$metada.totalPages;
+        var newData = response.data.result.data;
+        markerpositions.push.apply(markerpositions, _toConsumableArray(newData.map(function (m) {
+          return {
+            name: m.variantName,
+            chromosome: m.linkageGroupName,
+            position: m.position
+          };
+        })));
+
+        if (currentPage < totalPages - 1) {
+          var nextPage = currentPage + 1;
+          var newParams = {
+            params: {
+              page: nextPage
+            }
+          };
+          return processMarkerPositionsCall(client, url, newParams, markerpositions);
+        }
+
+        return markerpositions;
+      })["catch"](function (error) {
+        // eslint-disable-next-line no-console
+        console.log(error);
+      });
+    }
+
+    function processVariantSetCall(client, url, params) {
+      var variantSetCalls = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
+      return client.get(url, params).then(function (response) {
+        var nextPageToken = response.data.metadata.pagination.nextPageToken;
+        var newData = response.data.result.data;
+        variantSetCalls.push.apply(variantSetCalls, _toConsumableArray(newData.map(function (calls) {
+          return {
+            lineName: calls.callSetName,
+            markerName: calls.variantName,
+            allele: calls.genotype.values[0]
+          };
+        })));
+
+        if (nextPageToken) {
+          var newParams = {
+            params: {
+              pageToken: nextPageToken
+            }
+          };
+          return processVariantSetCall(client, url, newParams, variantSetCalls);
+        }
+
+        return variantSetCalls;
+      })["catch"](function (error) {
+        // eslint-disable-next-line no-console
+        console.log(error);
+      });
+    }
+
+    genotypeRenderer.renderGenotypesBrapi = function renderGenotypesBrapi(domParent, width, height, server, matrixId, mapId, authToken) {
       createRendererComponents(domParent, width, height);
       var germplasmData;
       var client = axios$1.create({
         baseURL: server
       });
-      client.defaults.headers.common['Authorization'] = 'Bearer ' + authToken;
-      var newParams = {
-        params: {
-          pageToken: '95'
-        }
-      }; // TODO: GOBii don't have the markerpositions call implemented yet so I 
-      // can't load map data
+      client.defaults.headers.common.Authorization = "Bearer ".concat(authToken);
+      console.log(mapId);
 
-      processMarkerPositionsCall(client, '/markerpositions?mapDbId=' + mapId).then(function (markerpositions) {
-        var mapImporter = new MapImporter();
-        genomeMap = mapImporter.parseMarkerpositions(markerpositions);
-        processVariantSetCall(client, '/variantsets/' + matrixId + '/calls?pageSize=100000', newParams).then(function (variantSetCalls) {
+      if (mapId !== null) {
+        // TODO: GOBii don't have the markerpositions call implemented yet so I
+        // can't load map data
+        processMarkerPositionsCall(client, "/markerpositions?mapDbId=".concat(mapId)).then(function (markerpositions) {
+          var mapImporter = new MapImporter();
+          genomeMap = mapImporter.parseMarkerpositions(markerpositions);
+          processVariantSetCall(client, "/variantsets/".concat(matrixId, "/calls")).then(function (variantSetCalls) {
+            var genotypeImporter = new GenotypeImporter(genomeMap);
+
+            if (genomeMap === undefined) {
+              genomeMap = genotypeImporter.createFakeMapFromVariantSets(variantSetCalls);
+            }
+
+            germplasmData = genotypeImporter.parseVariantSetCalls(variantSetCalls);
+            var stateTable = genotypeImporter.stateTable;
+            dataSet = new DataSet(genomeMap, germplasmData, stateTable);
+            colorScheme = new NucleotideColorScheme(dataSet);
+            populateLineSelect();
+            genotypeCanvas.init(dataSet, colorScheme);
+            genotypeCanvas.prerender(); // Tells the dom parent that Flapjack has finished loading. Allows spinners
+            // or similar to be disabled
+
+            sendEvent('FlapjackFinished', domParent);
+          })["catch"](function (error) {
+            sendEvent('FlapjackError', domParent); // eslint-disable-next-line no-console
+
+            console.log(error);
+          });
+        })["catch"](function (error) {
+          sendEvent('FlapjackError', domParent); // eslint-disable-next-line no-console
+
+          console.log(error);
+        });
+      } else {
+        processVariantSetCall(client, "/variantsets/".concat(matrixId, "/calls")).then(function (variantSetCalls) {
           var genotypeImporter = new GenotypeImporter(genomeMap);
 
           if (genomeMap === undefined) {
@@ -3672,77 +4289,72 @@
 
           germplasmData = genotypeImporter.parseVariantSetCalls(variantSetCalls);
           var stateTable = genotypeImporter.stateTable;
-          colorScheme = new NucleotideColorScheme(stateTable, document);
-          dataSet = new DataSet(genomeMap, germplasmData);
+          dataSet = new DataSet(genomeMap, germplasmData, stateTable);
+          colorScheme = new NucleotideColorScheme(dataSet);
+          populateLineSelect();
           genotypeCanvas.init(dataSet, colorScheme);
           genotypeCanvas.prerender(); // Tells the dom parent that Flapjack has finished loading. Allows spinners
           // or similar to be disabled
 
-          sendEvent("FlapjackFinished", domParent);
+          sendEvent('FlapjackFinished', domParent);
         })["catch"](function (error) {
-          sendEvent("FlapjackError", domParent);
+          sendEvent('FlapjackError', domParent); // eslint-disable-next-line no-console
+
           console.log(error);
-        });
-      })["catch"](function (error) {
-        sendEvent("FlapjackError", domParent);
-        console.log(error);
-      });
-      return genotypeRenderer;
-    };
-
-    genotypeRenderer.renderGenotypesUrl = function (domParent, width, height, mapFileURL, genotypeFileURL, authToken) {
-      createRendererComponents(domParent, width, height);
-
-      if (typeof mapFileURL !== 'undefined') {
-        fetch(mapFileURL, {
-          headers: {
-            "Authorization": "Bearer " + authToken
-          }
-        }).then(function (response) {
-          if (response.status !== 200) {
-            console.log("Couldn't load file: " + filepath + ". Status code: " + response.status);
-            return;
-          }
-
-          response.text().then(function (data) {
-            var lines = data.split(/\r?\n/);
-
-            for (var line = 0; line < lines.length; line += 1) {
-              processMapFileLine(lines[line]);
-            }
-          });
-        })["catch"](function (err) {
-          console.log('Fetch Error :-S', err);
         });
       }
 
-      fetch(genotypeFileURL, {
-        headers: {
-          "Authorization": "Bearer " + authToken
-        }
-      }).then(function (response) {
-        if (response.status !== 200) {
-          console.log("Couldn't load file: " + filepath + ". Status code: " + response.status);
-          return;
-        }
-
-        response.text().then(function (data) {
-          var lines = data.split(/\r?\n/);
-
-          for (var line = 0; line < lines.length; line += 1) {
-            processFileLine(lines[line]);
-          }
-
-          setupColorStamps(boxSize);
-          genotypeCanvas.init(markerData, lineNames, lineData, qtls, colorStamps);
-          genotypeCanvas.prerender();
-        });
-      })["catch"](function (err) {
-        console.log('Fetch Error :-S', err);
-      });
-      sendEvent('FlapjackFinished', domParent);
       return genotypeRenderer;
-    };
+    }; // genotypeRenderer.renderGenotypesUrl = function renderGenotypesUrl(
+    //   domParent,
+    //   width,
+    //   height,
+    //   mapFileURL,
+    //   genotypeFileURL,
+    //   authToken,
+    // ) {
+    //   createRendererComponents(domParent, width, height);
+    //   if (typeof mapFileURL !== 'undefined') {
+    //     fetch(mapFileURL, { headers: { Authorization: `Bearer ${authToken}` } })
+    //       .then((response) => {
+    //         if (response.status !== 200) {
+    //           console.log(`Couldn't load file: ${mapFileURL}. Status code: ${response.status}`);
+    //           return;
+    //         }
+    //         response.text().then((data) => {
+    //           const lines = data.split(/\r?\n/);
+    //           for (let line = 0; line < lines.length; line += 1) {
+    //             processMapFileLine(lines[line]);
+    //           }
+    //         })
+    //       })
+    //       .catch((err) => {
+    //         console.log('Fetch Error :-S', err);
+    //       });
+    //   }
+    //   fetch(genotypeFileURL, { headers: { Authorization: `Bearer ${authToken}` } })
+    //     .then((response) => {
+    //       if (response.status !== 200) {
+    //         console.log(`Couldn't load file: ${genotypeFileURL}. Status code: ${response.status}`);
+    //         return;
+    //       }
+    //       response.text().then((data) => {
+    //         const lines = data.split(/\r?\n/);
+    //         for (let line = 0; line < lines.length; line += 1) {
+    //           processFileLine(lines[line]);
+    //         }
+    //         setupColorStamps(boxSize);
+    //         genotypeCanvas.init(markerData, lineNames, lineData, qtls, colorStamps);
+    //         genotypeCanvas.prerender();
+    //       });
+    //     })
+    //     .catch((err) => {
+    //       console.log('Fetch Error :-S', err);
+    //     });
+    //   sendEvent('FlapjackFinished', domParent);
+    //   return genotypeRenderer;
+    // };
+
 
     function loadFromFile(fileDom) {
       var file = document.getElementById(fileDom.slice(1)).files[0];
@@ -3760,10 +4372,19 @@
 
         reader.readAsText(file);
       });
-    } // eslint-disable-next-line func-names
+    }
 
+    function populateLineSelect() {
+      var lineSelect = document.getElementById('lineSelect');
+      dataSet.germplasmList.forEach(function (germplasm, idx) {
+        var opt = document.createElement('option');
+        opt.value = idx;
+        opt.text = germplasm.name;
+        lineSelect.add(opt);
+      });
+    }
 
-    genotypeRenderer.renderGenotypesFile = function (domParent, width, height, mapFileDom, genotypeFileDom, qtlFileDom) {
+    genotypeRenderer.renderGenotypesFile = function renderGenotypesFile(domParent, width, height, mapFileDom, genotypeFileDom) {
       createRendererComponents(domParent, width, height); // let qtls = [];
 
       var germplasmData;
@@ -3791,111 +4412,14 @@
 
         germplasmData = genotypeImporter.parseFile(result);
         var stateTable = genotypeImporter.stateTable;
-        colorScheme = new NucleotideColorScheme(stateTable, document);
-        dataSet = new DataSet(genomeMap, germplasmData);
+        dataSet = new DataSet(genomeMap, germplasmData, stateTable);
+        colorScheme = new NucleotideColorScheme(dataSet);
+        populateLineSelect();
         genotypeCanvas.init(dataSet, colorScheme);
         genotypeCanvas.prerender();
       });
       return genotypeRenderer;
     };
-
-    function processMarkerPositionsCall(client, url, params) {
-      var markerpositions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
-      return client.get(url, params).then(function (response) {
-        var _response$data$metada = response.data.metadata.pagination,
-            currentPage = _response$data$metada.currentPage,
-            totalPages = _response$data$metada.totalPages;
-        var newData = response.data.result.data;
-        markerpositions.push.apply(markerpositions, _toConsumableArray(newData.map(function (m) {
-          return {
-            name: m.markerName,
-            chromosome: m.linkageGroupName,
-            position: m.position
-          };
-        })));
-
-        if (currentPage < totalPages - 1) {
-          var nextPage = currentPage + 1;
-          var newParams = {
-            params: {
-              page: nextPage
-            }
-          };
-          return processMarkerPositionsCall(client, url, newParams, markerpositions);
-        }
-
-        return markerpositions;
-      })["catch"](function (error) {
-        console.log(error);
-      });
-    }
-
-    function processVariantSetCall(client, url, params) {
-      var variantSetCalls = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
-      return client.get(url, params).then(function (response) {
-        var nextPageToken = response.data.metadata.pagination.nextPageToken;
-        console.log(nextPageToken);
-        var newData = response.data.result.data;
-        variantSetCalls.push.apply(variantSetCalls, _toConsumableArray(newData.map(function (calls) {
-          return {
-            lineName: calls.callSetName,
-            markerName: calls.variantName,
-            allele: calls.genotype.values[0]
-          };
-        })));
-
-        if (nextPageToken) {
-          var newParams = {
-            params: {
-              pageToken: nextPageToken
-            }
-          };
-          return processVariantSetCall(client, url, newParams, variantSetCalls);
-        }
-
-        return variantSetCalls;
-      })["catch"](function (error) {
-        console.log(error);
-      });
-    }
-
-    function createRendererComponents(domParent, width, height) {
-      var canvasHolder = document.getElementById(domParent.slice(1));
-      genotypeCanvas = new GenotypeCanvas(width, height, boxSize);
-      canvasHolder.append(genotypeCanvas.canvas);
-      var zoomDiv = document.createElement('div');
-      zoomDiv.id = 'zoom-holder';
-      var zoomLabel = document.createElement('label');
-      zoomLabel.setAttribute('for', 'zoom-control');
-      zoomLabel.innerHTML = 'Zoom:';
-      var range = document.createElement('input');
-      range.setAttribute('type', 'range');
-      range.min = 2;
-      range.max = 64;
-      range.value = 16;
-      range.addEventListener('change', function () {
-        zoom(range.value);
-      });
-      range.addEventListener('input', function () {
-        zoom(range.value);
-      });
-      zoomDiv.appendChild(zoomLabel);
-      zoomDiv.appendChild(range);
-      canvasHolder.appendChild(zoomDiv);
-      canvasController = new CanvasController(genotypeCanvas);
-    }
-
-    function zoom(size) {
-      genotypeCanvas.zoom(size, colorScheme);
-    }
-
-    function sendEvent(eventName, domParent) {
-      // TODO: Invesitgate using older event emitting code for IE support
-      var canvasHolder = document.getElementById(domParent.slice(1)); // Create the event.
-
-      var event = new Event(eventName);
-      canvasHolder.dispatchEvent(event);
-    }
 
     return genotypeRenderer;
   }
