@@ -2595,6 +2595,7 @@
     }, {
       key: "setComparisonLineIndex",
       value: function setComparisonLineIndex(newIndex) {
+        this.comparisonLineIndex = newIndex;
         this.colorScheme.setComparisonLineIndex(newIndex);
         this.prerender(true);
       } //   rainbowColor(numOfSteps, step) {
@@ -4125,6 +4126,17 @@
       canvasHolder.append(genotypeCanvas.canvas);
       var zoomDiv = document.createElement('div');
       zoomDiv.id = 'zoom-holder';
+      var form = document.createElement('form');
+      var formRow = document.createElement('div');
+      formRow.classList.add('row');
+      var zoomCol = document.createElement('div');
+      zoomCol.classList.add('col');
+      var formZoomDiv = document.createElement('div');
+      formZoomDiv.classList.add('form-group');
+      var zoomFieldSet = document.createElement('fieldset');
+      var zoomLegend = document.createElement('legend');
+      var zoomLegendText = document.createTextNode('Controls');
+      zoomLegend.appendChild(zoomLegendText);
       var zoomLabel = document.createElement('label');
       zoomLabel.setAttribute('for', 'zoom-control');
       zoomLabel.innerHTML = 'Zoom:';
@@ -4143,37 +4155,91 @@
       colorButton.id = 'colorButton';
       var textnode = document.createTextNode('Color schemes...');
       colorButton.appendChild(textnode);
-      var fieldSet = document.createElement('fieldset');
-      var legend = document.createElement('legend');
-      var legendText = document.createTextNode('Color Schemes');
-      legend.appendChild(legendText);
-      fieldSet.appendChild(legend);
-      addRadioButton('selectedScheme', 'nucleotideScheme', 'Nucleotide', true, fieldSet);
-      addRadioButton('selectedScheme', 'similarityScheme', 'Similarity to line', false, fieldSet);
-      var lineSelect = document.createElement('select');
-      lineSelect.id = 'lineSelect';
-      lineSelect.disabled = true;
-      fieldSet.appendChild(lineSelect);
-      zoomDiv.appendChild(zoomLabel);
-      zoomDiv.appendChild(range);
-      zoomDiv.appendChild(fieldSet);
-      canvasHolder.appendChild(zoomDiv); // createColorModal(canvasHolder);
-
+      var colorFieldSet = createColorSchemeFieldset();
+      zoomFieldSet.appendChild(zoomLegend);
+      zoomFieldSet.appendChild(zoomLabel);
+      zoomFieldSet.appendChild(range);
+      formZoomDiv.appendChild(zoomFieldSet);
+      zoomCol.appendChild(formZoomDiv);
+      formRow.appendChild(zoomCol);
+      formRow.appendChild(colorFieldSet);
+      form.appendChild(formRow);
+      zoomDiv.appendChild(form);
+      canvasHolder.appendChild(zoomDiv);
+      addStyleSheet();
       canvasController = new CanvasController(genotypeCanvas);
     }
 
     function addRadioButton(name, id, text, checked, parent) {
+      var formCheck = document.createElement('div');
+      formCheck.classList.add('form-check');
       var radio = document.createElement('input');
       radio.setAttribute('type', 'radio');
       radio.name = name;
       radio.id = id;
       radio.checked = checked;
+      radio.classList.add('form-check-input');
       var radioLabel = document.createElement('label');
       radioLabel.htmlFor = id;
+      radioLabel.classList.add('form-check-label');
       var labelText = document.createTextNode(text);
       radioLabel.appendChild(labelText);
-      parent.appendChild(radio);
-      parent.appendChild(radioLabel);
+      formCheck.appendChild(radio);
+      formCheck.appendChild(radioLabel);
+      parent.appendChild(formCheck);
+    }
+
+    function addCSSRule(sheet, selector, rules, index) {
+      if ('insertRule' in sheet) {
+        sheet.insertRule(selector + '{' + rules + '}', index);
+      } else if ('addRule' in sheet) {
+        sheet.addRule(selector, rules, index);
+      }
+    }
+
+    function addStyleSheet() {
+      var sheet = function () {
+        // Create the <style> tag
+        var style = document.createElement("style"); // WebKit hack :(
+
+        style.appendChild(document.createTextNode("")); // Add the <style> element to the page
+
+        document.head.appendChild(style);
+        return style.sheet;
+      }();
+
+      addCSSRule(sheet, 'legend', 'border-style: none; border-width: 0; font-size: 14px; line-height: 20px; margin-bottom: 0; width: auto; padding: 0 10px; border: 1px solid #e0e0e0;');
+      addCSSRule(sheet, 'fieldset', 'border: 1px solid #e0e0e0; padding: 10px;'); // addCSSRule(sheet, 'input', 'margin: .4rem;');
+    }
+
+    function createColorSchemeFieldset() {
+      var formCol = document.createElement('div');
+      formCol.classList.add('col');
+      var formGroup = document.createElement('div');
+      formGroup.classList.add('form-group');
+      var fieldset = document.createElement('fieldset');
+      var legend = document.createElement('legend');
+      var legendText = document.createTextNode('Color Schemes');
+      legend.appendChild(legendText);
+      var radioCol = document.createElement('div');
+      radioCol.classList.add('col');
+      addRadioButton('selectedScheme', 'nucleotideScheme', 'Nucleotide', true, radioCol);
+      addRadioButton('selectedScheme', 'similarityScheme', 'Similarity to line', false, radioCol);
+      var selectLabel = document.createElement('label');
+      selectLabel.htmlFor = 'lineSelect';
+      selectLabel.classList.add('col-form-label');
+      var labelText = document.createTextNode('Comparison line:');
+      selectLabel.appendChild(labelText);
+      var lineSelect = document.createElement('select');
+      lineSelect.id = 'lineSelect';
+      lineSelect.disabled = true;
+      fieldset.appendChild(legend);
+      fieldset.appendChild(radioCol);
+      fieldset.appendChild(selectLabel);
+      fieldset.appendChild(lineSelect);
+      formGroup.appendChild(fieldset);
+      formCol.appendChild(formGroup);
+      return formCol;
     }
 
     function processMarkerPositionsCall(client, url, params) {
