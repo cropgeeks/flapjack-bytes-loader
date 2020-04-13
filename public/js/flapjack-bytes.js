@@ -4134,6 +4134,7 @@
       var formZoomDiv = document.createElement('div');
       formZoomDiv.classList.add('form-group');
       var zoomFieldSet = document.createElement('fieldset');
+      zoomFieldSet.classList.add('bytes-fieldset');
       var zoomLegend = document.createElement('legend');
       var zoomLegendText = document.createTextNode('Controls');
       zoomLegend.appendChild(zoomLegendText);
@@ -4208,8 +4209,8 @@
         return style.sheet;
       }();
 
-      addCSSRule(sheet, 'legend', 'border-style: none; border-width: 0; font-size: 14px; line-height: 20px; margin-bottom: 0; width: auto; padding: 0 10px; border: 1px solid #e0e0e0;');
-      addCSSRule(sheet, 'fieldset', 'border: 1px solid #e0e0e0; padding: 10px;'); // addCSSRule(sheet, 'input', 'margin: .4rem;');
+      addCSSRule(sheet, '.bytes-fieldset > legend', 'border-style: none; border-width: 0; font-size: 14px; line-height: 20px; margin-bottom: 0; width: auto; padding: 0 10px; border: 1px solid #e0e0e0;');
+      addCSSRule(sheet, '.bytes-fieldset', 'border: 1px solid #e0e0e0; padding: 10px;'); // addCSSRule(sheet, 'input', 'margin: .4rem;');
     }
 
     function createColorSchemeFieldset() {
@@ -4218,6 +4219,7 @@
       var formGroup = document.createElement('div');
       formGroup.classList.add('form-group');
       var fieldset = document.createElement('fieldset');
+      fieldset.classList.add('bytes-fieldset');
       var legend = document.createElement('legend');
       var legendText = document.createTextNode('Color Schemes');
       legend.appendChild(legendText);
