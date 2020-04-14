@@ -57,7 +57,7 @@ export default {
     const client = axios.create({ baseURL: this.baseUrl })
     client.defaults.headers.common['Authorization'] = 'Bearer ' + this.authToken
 
-    client.get("/variantsets", {},
+    client.get(`/variantsets?studyDbId=${this.selectedStudyId}`, {},
     {
       headers: { "Content-Type": "application/json",
       Authorization: "Bearer " + this.authToken }

@@ -83,7 +83,7 @@ export default {
             );
 
             if (response.data.access_token) {
-              this.$router.push({ name: "matrix" });
+              this.$router.push({ name: "study" });
             }
           }.bind(this)
         )
