@@ -6,7 +6,7 @@
           <h5 class="mt-3">Map Selection</h5>
 
           <h6 class="mt-3">Available maps:</h6>
-          <b-form-select v-model="selectedMap" :options="options"></b-form-select>
+          <b-form-select v-model="selectedMap" :options="options" size="sm"></b-form-select>
           <div></div>
 
           <div v-if="selectedMap">

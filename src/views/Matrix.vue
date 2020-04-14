@@ -7,7 +7,7 @@
 
           <h6 class="mt-3">Available VariantSets:</h6>
           <div>
-            <b-form-select v-model="selected" :options="options"></b-form-select>
+            <b-form-select v-model="selected" :options="options" size="sm"></b-form-select>
             <b-card v-if="selected" no-body class="mt-3">
               <b-card-header class="bg-info text-white">Details: {{selected.variantSetName}}</b-card-header>
               <b-card-body>

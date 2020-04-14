@@ -26,7 +26,6 @@
         <b-button variant="primary" class="mt-3" @click="navigateToNextPage" :disabled="selectedStudy === null">Select</b-button>
       </div>
     </b-form-group>
-    </div>
   </div>
 </template>
 
