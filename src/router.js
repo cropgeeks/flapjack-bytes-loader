@@ -19,14 +19,6 @@ const router = new Router({
       }
     },
     {
-      path: '/options',
-      name: 'options',
-      component: () => import('./views/Options.vue'),
-      meta: {
-        title: 'Flapjack Bytes Options',
-	}
-	},
-    {
       path: '/matrix',
       name: 'matrix',
       component: () => import('./views/Matrix.vue'),
