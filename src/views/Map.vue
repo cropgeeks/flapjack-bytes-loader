@@ -52,7 +52,12 @@ export default {
   },
 
   computed: {
-    ...mapGetters(["baseUrl", "authToken", "selectedOptions"])
+    ...mapGetters([
+      "baseUrl",
+      "authToken",
+      "selectedOptions",
+      "selectedStudyId"
+    ])
   },
 
   mounted: function() {
@@ -61,7 +66,7 @@ export default {
     const client = axios.create({ baseURL: this.baseUrl })
     client.defaults.headers.common['Authorization'] = 'Bearer ' + this.authToken
 
-    client.get("/maps", {}, 
+    client.get(`/maps?studyDbId${this.selectedStudyId}`, {}, 
     {
       headers: { "Content-Type": "application/json",
       Authorization: "Bearer " + this.authToken }
