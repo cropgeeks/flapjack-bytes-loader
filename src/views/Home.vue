@@ -3,6 +3,7 @@
     <div class="row">
       <div class="col-md-12">
         <div class="home-content">
+          <b-alert variant="danger" :show="!validServer">Please provide a valid BrAPI server resource</b-alert>
           <b-row>
             <b-col md="2"></b-col>
             <b-col md="8">
@@ -20,16 +21,22 @@
             </b-col>
             <b-col md="6">
               <b-form>
+                <h4>BrAPI Resource</h4>
+                <b-form-row>
+                  <b-form-input id="resource" v-model="userResource" type="text" v-on:change="checkResource"></b-form-input>
+                </b-form-row>
+              </b-form>
+              <b-form class="mt-3">
                 <h4>Login</h4>
                 <b-form-row>
-                    <b-form-input id="username" v-model="username" type="text" placeholder="Username"></b-form-input>
+                    <b-form-input id="username" v-model="username" type="text" placeholder="Username" :disabled="!validServer"></b-form-input>
                 </b-form-row>
                 <b-form-row class="mt-3">
-                    <b-form-input id="password" v-model="password" type="password" placeholder="Password"></b-form-input>
+                    <b-form-input id="password" v-model="password" type="password" placeholder="Password" :disabled="!validServer"></b-form-input>
                 </b-form-row>
 
                 <b-form-row class="mt-3">
-                  <b-button variant="primary" @click="loginClicked" class="ml-auto">Login</b-button>
+                  <b-button variant="primary" @click="loginClicked" class="ml-auto" :disabled="!validServer">Login</b-button>
                 </b-form-row>
               </b-form>
             </b-col>
@@ -53,13 +60,25 @@ export default {
       username: "",
       password: "",
       instance: null,
-      showDismissibleAlert: false
+      showDismissibleAlert: false,
+      userResource: this.brapiBase,
+      validServer: false
     };
   },
 
   mounted: function() {
     this.instance = axios.create({ baseURL: this.brapiBase });
     this.$store.dispatch("ON_BASE_URL_CHANGED", this.brapiBase);
+    this.instance.get('/serverinfo')
+      .then(function(response) {
+        if (response.status === 200) {
+          this.validServer = true;
+        } else {
+          this.validServer = false;
+        }
+      }.bind(this)).catch(() => {
+        this.validServer = false;
+      });
   },
 
   methods: {
@@ -94,6 +113,24 @@ export default {
 
     showAlert() {
       this.showDismissibleAlert = true;
+    },
+
+    checkResource() {
+      const temp = axios.create({ baseURL: this.userResource });
+      
+      temp.get('/serverinfo', {}, { headers: { "Content-Type": "application/json" }})
+        .then(function(response) {
+          if (response.status === 200) {
+            this.$store.dispatch("ON_BASE_URL_CHANGED", this.userResource);
+            this.instance = axios.create({ baseURL: this.userResource });
+            this.validServer = true;
+          } else {
+            this.validServer = false;
+          }
+        }.bind(this))
+        .catch(() => {
+          this.validServer = false;
+        })
     }
   }
 };
