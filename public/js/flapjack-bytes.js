@@ -2132,7 +2132,12 @@
       value: function highlightLineName() {
         if (this.lineUnderMouse) {
           this.drawingContext.save();
-          this.drawingContext.translate(0, this.mapCanvasHeight);
+          this.drawingContext.translate(0, this.mapCanvasHeight); // Prevent line name under scrollbar being highlighted
+
+          var region = new Path2D();
+          var clipHeight = this.canScrollX() ? this.alleleCanvasHeight() : this.canvas.height;
+          region.rect(0, 0, this.nameCanvasWidth, clipHeight);
+          this.drawingContext.clip(region);
           this.drawingContext.fillStyle = '#F00';
           this.drawingContext.font = this.font;
           var germplasmStart = Math.floor(this.translatedY / this.boxSize);
@@ -2275,7 +2280,8 @@
         // name canvas
 
         var region = new Path2D();
-        region.rect(0, this.mapCanvasHeight, this.nameCanvasWidth, this.canvas.height - this.scrollbarHeight - this.mapCanvasHeight);
+        var clipHeight = this.canScrollX() ? this.alleleCanvasHeight() : this.canvas.height;
+        region.rect(0, this.mapCanvasHeight, this.nameCanvasWidth, clipHeight);
         this.backContext.clip(region);
         var lineNames = this.dataSet.germplasmFor(germplasmStart, germplasmEnd).map(function (germplasm) {
           return germplasm.name;
