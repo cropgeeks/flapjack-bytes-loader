@@ -16,8 +16,8 @@
         <b-card-header class="bg-info text-white">Details: {{selectedStudy.name}}</b-card-header>
         <b-card-body>
           <p>Id: {{selectedStudy.id}}</p>
+          <p>Description: {{selectedStudy.description}}</p>
           <p>Code: {{selectedStudy.studyCode}}</p>
-          <p>Contact email: {{selectedStudy.email}}</p>
         </b-card-body>
       </b-card>
     </div>
@@ -72,7 +72,7 @@ export default {
         name: option.studyName,
         id: option.studyDbId,
         studyCode: option.studyCode,
-        email: option.email,
+        description: option.studyDescripton
       };
       this.options.push({ text: study.name, value: study });
     },
