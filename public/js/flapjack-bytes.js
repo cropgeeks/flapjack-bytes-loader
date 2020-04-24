@@ -2279,7 +2279,9 @@
         this.backContext.save(); // Create a clipping region so that lineNames can't creep up above the line
         // name canvas
 
-        var region = new Path2D();
+        var region = new Path2D(); // We need to take account of the scrollbar potentially disappearing when
+        //zoomed out
+
         var clipHeight = this.canScrollX() ? this.alleleCanvasHeight() : this.canvas.height;
         region.rect(0, this.mapCanvasHeight, this.nameCanvasWidth, clipHeight);
         this.backContext.clip(region);
