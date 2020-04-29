@@ -72,6 +72,21 @@ export default {
       resp.result.data.forEach(study => {
         vm.addOption(study)
       })
+
+      // Sort the studies alphabetically before display
+      this.options.sort(function(a, b) {
+        var nameA = a.text.toUpperCase();
+        var nameB = b.text.toUpperCase();
+        if (nameA < nameB) {
+          return -1;
+        }
+        if (nameA > nameB) {
+          return 1;
+        }
+
+        // names must be equal
+        return 0;
+      });
     })
   },
 
