@@ -25,7 +25,7 @@
     <b-row>
       <b-col md="2"></b-col>
       <b-col md="8">
-        <b-button variant="secondary" class="mt-3" @click="backToMatrix">Back to VariantSet selection</b-button>
+        <b-button variant="secondary" class="mt-3" @click="back">Back to Map selection</b-button>
       </b-col>
     </b-row>
   </div>
@@ -91,6 +91,12 @@ export default {
       this.mapId,
       this.authToken
     );
+
+    document.addEventListener("backbutton", this.deselectMap, false);
+  },
+
+  beforeDestroy: function() {
+    document.removeEventListener("backbutton", this.deselectMap);
   },
 
   methods: {
@@ -98,10 +104,13 @@ export default {
       this.showDismissibleAlert = true;
     },
     
-    backToMatrix: function() {
-      this.$store.dispatch("ON_MATRIX_ID_CHANGED", null);
+    back: function() {
       this.$store.dispatch("ON_MAP_ID_CHANGED", null);
-      this.$router.push({ name: "matrix" });
+      this.$router.go(-1);
+    },
+
+    deselectMap: function() {
+      this.$store.dispatch("ON_MAP_ID_CHANGED", null);
     }
   }
 };

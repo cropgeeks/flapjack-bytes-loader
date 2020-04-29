@@ -21,16 +21,26 @@
               </b-card-body>
             </b-card>
           </div>
-          <b-form-group class="text-right">
-            <b-button id="skipBtn" variant="secondary" class="mt-3 mr-3" @click="navigateToNextPage">Skip</b-button>
-            <b-button
-              id="continueBtn"
-              :disabled="selectedMap === null"
-              variant="primary"
-              class="mt-3"
-              @click="selectAndNavigateToNextPage"
-            >Select</b-button>
-          </b-form-group>
+          <b-form-row>
+            <b-col>
+              <b-form-group class="text-left">
+                <b-button id="backButton" variant="secondary" class="mt-3" @click="back">Back</b-button>
+              </b-form-group>
+            </b-col>
+          
+            <b-col>
+              <b-form-group class="text-right">
+                <b-button id="skipBtn" variant="secondary" class="mt-3 mr-3" @click="skipMapLoading">Skip</b-button>
+                <b-button
+                  id="continueBtn"
+                  :disabled="selectedMap === null"
+                  variant="primary"
+                  class="mt-3"
+                  @click="selectAndNavigateToNextPage"
+                >Select</b-button>
+              </b-form-group>
+            </b-col>
+          </b-form-row>
         </div>
       </div>
     </div>
@@ -83,6 +93,11 @@ export default {
       this.options.push({ text: option.mapName, value: option });
     },
 
+    skipMapLoading() {
+      this.$store.dispatch("ON_MAP_ID_CHANGED", null);
+      this.navigateToNextPage();
+    },
+
      navigateToNextPage() {
       this.$router.push({ name: "bytes" });
     },
@@ -90,7 +105,11 @@ export default {
     selectAndNavigateToNextPage() {
       this.$store.dispatch("ON_MAP_ID_CHANGED", this.selectedMap.mapDbId);
       this.navigateToNextPage();
-    }
+    },
+
+    back() {
+      this.$router.go(-1);
+    },
   }
 };
 </script>

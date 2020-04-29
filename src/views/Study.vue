@@ -21,11 +21,20 @@
         </b-card-body>
       </b-card>
     </div>
-    <b-form-group class="text-right">
-      <div class="mt-1">
-        <b-button variant="primary" class="mt-3" @click="navigateToNextPage" :disabled="selectedStudy === null">Select</b-button>
-      </div>
-    </b-form-group>
+    <b-form-row>
+      <b-col>
+        <b-form-group class="text-left">
+          <b-button id="backButton" variant="secondary" class="mt-3" @click="back">Back</b-button>
+        </b-form-group>
+      </b-col>
+      <b-col>
+        <b-form-group class="text-right">
+          <div class="mt-1">
+            <b-button variant="primary" class="mt-3" @click="navigateToNextPage" :disabled="selectedStudy === null">Select</b-button>
+          </div>
+        </b-form-group>
+      </b-col>
+    </b-form-row>
   </div>
 </template>
 
@@ -80,7 +89,12 @@ export default {
     navigateToNextPage() {
       this.$store.dispatch("ON_STUDY_CHANGED", this.selectedStudy.id);
       this.$router.push({ name: "matrix" });
-    }
+    },
+
+    back() {
+      this.$store.dispatch("ON_AUTH_TOKEN_CHANGED", null);
+      this.$router.push('/')
+    },
   }
 };
 </script>

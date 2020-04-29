@@ -17,11 +17,20 @@
               </b-card-body>
             </b-card>
 
-            <b-form-group class="text-right">
-              <div class="mt-1">
-                <b-button variant="primary" class="mt-3" @click="navigateToNextPage" :disabled="selected === null">Select</b-button>
-              </div>
-            </b-form-group>
+            <b-form-row>
+              <b-col>
+                <b-form-group class="text-left">
+                  <b-button id="backButton" variant="secondary" class="mt-3" @click="back">Back</b-button>
+                </b-form-group>
+              </b-col>
+              <b-col>
+                <b-form-group class="text-right">
+                  <div class="mt-1">
+                    <b-button variant="primary" class="mt-3" @click="navigateToNextPage" :disabled="selected === null">Select</b-button>
+                  </div>
+                </b-form-group>
+              </b-col>
+            </b-form-row>
           </div>
         </div>
       </div>
@@ -83,6 +92,9 @@ export default {
     //   this.$store.dispatch("ON_MATRIX_ID_CHANGED", this.selected.variantSetDbId);
     //   this.$router.push({ name: "map" });
     // }
+    back() {
+      this.$router.go(-1);
+    },
   }
 };
 </script>
