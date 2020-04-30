@@ -1987,6 +1987,16 @@
         return this.canvas.height - this.mapCanvasHeight - this.scrollbarHeight;
       }
     }, {
+      key: "maxDataHeight",
+      value: function maxDataHeight() {
+        return this.dataSet.lineCount() * this.boxSize;
+      }
+    }, {
+      key: "maxDataWidth",
+      value: function maxDataWidth() {
+        return this.dataSet.markerCount() * this.boxSize + (this.dataSet.chromosomeCount() - 1) * this.chromosomeGapSize;
+      }
+    }, {
       key: "chromosomeOffset",
       value: function chromosomeOffset(xPos) {
         var _this = this;
@@ -2474,7 +2484,7 @@
         var mouseXPosCanvas = this.translatedX + mouseXPos;
         var mouseYPos = y - this.mapCanvasHeight;
 
-        if (mouseXPos > 0 && mouseXPos < this.alleleCanvasWidth()) {
+        if (mouseXPos > 0 && mouseXPos < this.alleleCanvasWidth() && mouseXPos < this.maxDataWidth()) {
           // Calculate the marker's index in the dataset and get the marker data
           var offset = this.chromosomeOffset(mouseXPosCanvas);
           var markerIndex = Math.floor((this.translatedX - offset + mouseXPos) / this.boxSize);
@@ -2491,7 +2501,7 @@
 
         this.chromosomeUnderMouse = this.chromosomeIndexFor(mouseXPosCanvas);
 
-        if (mouseYPos > 0 && mouseYPos < this.alleleCanvasHeight()) {
+        if (mouseYPos > 0 && mouseYPos < this.alleleCanvasHeight() && mouseYPos < this.maxDataHeight()) {
           this.lineUnderMouse = Math.max(0, Math.floor(mouseYPos / this.boxSize));
           this.lineIndexUnderMouse = this.lineUnderMouse + Math.floor(this.translatedY / this.boxSize);
         } else {
@@ -3900,12 +3910,14 @@
       key: "createFakeMapFromVariantSets",
       value: function createFakeMapFromVariantSets(variantSetCalls) {
         var firstGenoName = variantSetCalls[0].callSetName;
-        var markerNames = variantSetCalls.filter(function (v) {
+        var firstGenoCalls = variantSetCalls.filter(function (v) {
           return v.callSetName === firstGenoName;
         }).map(function (v) {
           return v.markerName;
-        });
-        console.log(markerNames);
+        }); // Make sure we only have unique markerNames
+
+        var markerNames = _toConsumableArray(new Set(firstGenoCalls));
+
         var markers = [];
         markerNames.forEach(function (name, idx) {
           var marker = new Marker(name, 'unmapped', idx);
@@ -4087,6 +4099,11 @@
       key: "markerAt",
       value: function markerAt(markerIndex) {
         return this.genomeMap.markerAt(markerIndex);
+      }
+    }, {
+      key: "chromosomeCount",
+      value: function chromosomeCount() {
+        return this.genomeMap.chromosomes.length;
       }
     }, {
       key: "markerCount",
@@ -4320,7 +4337,6 @@
         baseURL: server
       });
       client.defaults.headers.common.Authorization = "Bearer ".concat(authToken);
-      console.log(mapId);
 
       if (mapId !== null) {
         // TODO: GOBii don't have the markerpositions call implemented yet so I
@@ -4381,59 +4397,52 @@
       }
 
       return genotypeRenderer;
-    }; // genotypeRenderer.renderGenotypesUrl = function renderGenotypesUrl(
-    //   domParent,
-    //   width,
-    //   height,
-    //   mapFileURL,
-    //   genotypeFileURL,
-    //   authToken,
-    // ) {
-    //   createRendererComponents(domParent, width, height);
-    //   if (typeof mapFileURL !== 'undefined') {
-    //     fetch(mapFileURL, { headers: { Authorization: `Bearer ${authToken}` } })
-    //       .then((response) => {
-    //         if (response.status !== 200) {
-    //           console.log(`Couldn't load file: ${mapFileURL}. Status code: ${response.status}`);
-    //           return;
-    //         }
-    //         response.text().then((data) => {
-    //           const lines = data.split(/\r?\n/);
-    //           for (let line = 0; line < lines.length; line += 1) {
-    //             processMapFileLine(lines[line]);
-    //           }
-    //         })
-    //       })
-    //       .catch((err) => {
-    //         console.log('Fetch Error :-S', err);
-    //       });
-    //   }
-    //   fetch(genotypeFileURL, { headers: { Authorization: `Bearer ${authToken}` } })
-    //     .then((response) => {
-    //       if (response.status !== 200) {
-    //         console.log(`Couldn't load file: ${genotypeFileURL}. Status code: ${response.status}`);
-    //         return;
-    //       }
-    //       response.text().then((data) => {
-    //         const lines = data.split(/\r?\n/);
-    //         for (let line = 0; line < lines.length; line += 1) {
-    //           processFileLine(lines[line]);
-    //         }
-    //         setupColorStamps(boxSize);
-    //         genotypeCanvas.init(markerData, lineNames, lineData, qtls, colorStamps);
-    //         genotypeCanvas.prerender();
-    //       });
-    //     })
-    //     .catch((err) => {
-    //       console.log('Fetch Error :-S', err);
-    //     });
-    //   sendEvent('FlapjackFinished', domParent);
-    //   return genotypeRenderer;
-    // };
+    };
 
+    genotypeRenderer.renderGenotypesUrl = function renderGenotypesUrl(domParent, width, height, mapFileURL, genotypeFileURL, authToken) {
+      createRendererComponents(domParent, width, height);
+      var mapFile;
+      var genotypeFile;
+      axios$1.get(mapFileURL, {}, {
+        headers: {
+          'Content-Type': 'text/plain'
+        }
+      }).then(function (response) {
+        mapFile = response.data;
+      })["catch"](function (error) {
+        console.log(error);
+      }).then(function () {
+        if (mapFile !== undefined) {
+          var mapImporter = new MapImporter();
+          genomeMap = mapImporter.parseFile(mapFile);
+        }
 
-    function loadFromFile(fileDom) {
-      var file = document.getElementById(fileDom.slice(1)).files[0];
+        axios$1.get(genotypeFileURL, {}, {
+          headers: {
+            'Content-Type': 'text/plain'
+          }
+        }).then(function (response) {
+          genotypeFile = response.data;
+        }).then(function () {
+          var genotypeImporter = new GenotypeImporter(genomeMap);
+
+          if (genomeMap === undefined) {
+            genomeMap = genotypeImporter.createFakeMap(genotypeFile);
+          }
+
+          var germplasmData = genotypeImporter.parseFile(genotypeFile);
+          var stateTable = genotypeImporter.stateTable;
+          dataSet = new DataSet(genomeMap, germplasmData, stateTable);
+          colorScheme = new NucleotideColorScheme(dataSet);
+          populateLineSelect();
+          genotypeCanvas.init(dataSet, colorScheme);
+          genotypeCanvas.prerender();
+        });
+      });
+      return genotypeRenderer;
+    };
+
+    function loadFromFile(file) {
       return new Promise(function (resolve, reject) {
         var reader = new FileReader();
 
@@ -4464,9 +4473,11 @@
       createRendererComponents(domParent, width, height); // let qtls = [];
 
       var germplasmData;
-      var mapPromise = loadFromFile(mapFileDom); // const qtlPromise = loadFromFile(qtlFileDom);
+      var mapFile = document.getElementById(mapFileDom.slice(1)).files[0];
+      var mapPromise = loadFromFile(mapFile); // const qtlPromise = loadFromFile(qtlFileDom);
 
-      var genotypePromise = loadFromFile(genotypeFileDom); // Load map data
+      var genotypeFile = document.getElementById(genotypeFileDom.slice(1)).files[0];
+      var genotypePromise = loadFromFile(genotypeFile); // Load map data
 
       mapPromise.then(function (result) {
         var mapImporter = new MapImporter();
